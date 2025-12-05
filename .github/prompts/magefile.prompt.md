@@ -1,6 +1,6 @@
 ---
 description: Add or modify commands in magefile.go
-name: magefile
+agent: agent
 tools: ['edit/editFiles', 'search/codebase']
 ---
 
