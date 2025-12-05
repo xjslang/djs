@@ -8,7 +8,7 @@
 - Documentation must be in **English**: README, code comments, JSDoc/GoDoc, etc.
 - Communication with the user can be in **Spanish** if the user writes in Spanish.
 
-## Ejemplos
+## Examples
 ```go
 // Correct
 func GetUserByID(id string) (*User, error)
