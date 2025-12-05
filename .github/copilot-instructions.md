@@ -17,6 +17,12 @@ func GetUserByID(id string) (*User, error)
 func ObtenerUsuarioPorID(id string) (*Usuario, error)
 ```
 
+## Response Behavior
+
+**Always ask before modifying files.** Do not edit, create, or delete files unless the user explicitly confirms they want changes made.
+
+If you think a code change might be helpful, first explain what you would do and ask for confirmation.
+
 ## Project Overview
 
 DJS is a JavaScript language extension that adds Go-style `defer` statements and error-handling `or` blocks. Built on the `xjslang/xjs` parser framework (v0.1.0), it uses a **plugin-based architecture** where each language feature is implemented as a parser plugin that intercepts and transforms the AST during parsing.
