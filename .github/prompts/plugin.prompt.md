@@ -21,8 +21,8 @@ Every plugin must:
 ## Reference implementations
 
 Study these existing plugins for patterns:
-- [defer_parser.go](../../plugins/defer_parser.go) - Token interception, statement transformation, function wrapping
-- [or_parser.go](../../plugins/or_parser.go) - Expression interception, statement wrapping
+- [defer_plugin.go](../../plugins/defer_plugin.go) - Token interception, statement transformation, function wrapping
+- [or_plugin.go](../../plugins/or_plugin.go) - Expression interception, statement wrapping
 
 ## Key patterns
 
