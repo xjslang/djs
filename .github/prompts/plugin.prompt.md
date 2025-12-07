@@ -1,18 +1,18 @@
 ---
-description: Create a new DJS parser plugin
+description: Create a new DJS plugin
 agent: agent
 tools: ['edit/editFiles', 'search/codebase']
 ---
 
 # Create a new DJS plugin
 
-Your task is to create a new parser plugin for DJS following the established architecture.
+Your task is to create a new plugin for DJS following the established architecture.
 
 ## Plugin structure
 
 Every plugin must:
 
-1. Be created in `plugins/` directory as `<feature>_parser.go`
+1. Be created in `plugins/` directory as `<feature>_plugin.go`
 2. Export a function `func <Feature>Plugin(pb *parser.Builder)`
 3. Register custom tokens via `pb.LexerBuilder.RegisterTokenType()`
 4. Use interceptors: Token, Statement, and/or Expression as needed
