@@ -6,6 +6,11 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+// Test runs all Go tests in the project using 'go test ./...'
+func Test() error {
+	return sh.RunV("go", "test", "./...")
+}
+
 // Bench runs project benchmarks using 'go test -bench=.'
 func Bench() error {
 	return sh.RunV("go", "test", "-bench=.")
