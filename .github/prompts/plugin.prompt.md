@@ -1,7 +1,7 @@
 ---
 description: Create a new DJS plugin
 agent: agent
-tools: ['edit/editFiles', 'search/codebase']
+tools: ['edit/createFile', 'edit/editFiles', 'search/codebase']
 ---
 
 # Create a new DJS plugin
