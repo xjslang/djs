@@ -1,0 +1,7 @@
+outer function start
+doing some work
+outer function end
+outer function cleanup
+inner function start
+inner function end
+inner function cleanup

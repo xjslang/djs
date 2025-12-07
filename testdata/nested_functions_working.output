@@ -1,0 +1,6 @@
+outer function start
+inner function start
+inner function end
+inner function cleanup
+outer function end
+outer function cleanup

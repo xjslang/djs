@@ -1,0 +1,5 @@
+begin transaction: 123
+execute query in transaction: 123
+commit transaction: 123
+close connection for transaction: 123
+rollback transaction: 123

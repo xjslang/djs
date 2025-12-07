@@ -1,0 +1,7 @@
+acquiring resource 1
+acquiring resource 2
+acquiring resource 3
+doing work
+releasing resource 3
+releasing resource 2
+releasing resource 1
