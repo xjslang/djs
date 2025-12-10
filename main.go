@@ -30,6 +30,7 @@ func main() {
 	p := parser.NewBuilder(lb).
 		Install(plugins.DeferPlugin).
 		Install(plugins.OrPlugin).
+		Install(plugins.StrictEqualityPlugin).
 		Build(string(input))
 	program, err := p.ParseProgram()
 	if err != nil {
@@ -37,5 +38,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	execCommand(program.String())
+	err = execCommand(program.String())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }

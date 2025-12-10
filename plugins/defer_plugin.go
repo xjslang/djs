@@ -7,6 +7,7 @@ import (
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
+	"github.com/xjslang/xjs/srmap"
 	"github.com/xjslang/xjs/token"
 )
 
@@ -15,15 +16,15 @@ type DeferFunctionDeclaration struct {
 	prefix string
 }
 
-func (fd *DeferFunctionDeclaration) WriteTo(b *strings.Builder) {
+func (fd *DeferFunctionDeclaration) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
 	b.WriteString("function ")
-	fd.Name.WriteTo(b)
+	fd.Name.WriteTo(b, m)
 	b.WriteRune('(')
 	for i, param := range fd.Parameters {
 		if i > 0 {
 			b.WriteRune(',')
 		}
-		param.WriteTo(b)
+		param.WriteTo(b, m)
 	}
 
 	var hasDefers bool
@@ -39,14 +40,14 @@ func (fd *DeferFunctionDeclaration) WriteTo(b *strings.Builder) {
 		indexName := "i_" + fd.prefix
 		errorName := "e_" + fd.prefix
 		b.WriteString(") {let " + deferName + "=[];try")
-		fd.Body.WriteTo(b)
+		fd.Body.WriteTo(b, m)
 		b.WriteString("finally{" +
 			"for(let " + indexName + "=" + deferName + ".length;" + indexName + ">0;" + indexName + "--){" +
 			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
 		)
 	} else {
 		b.WriteRune(')')
-		fd.Body.WriteTo(b)
+		fd.Body.WriteTo(b, m)
 	}
 }
 
@@ -55,10 +56,10 @@ type DeferStatement struct {
 	prefix string
 }
 
-func (ds *DeferStatement) WriteTo(b *strings.Builder) {
+func (ds *DeferStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
 	deferName := "defers_" + ds.prefix
 	b.WriteString(deferName + ".push(() =>")
-	ds.Body.WriteTo(b)
+	ds.Body.WriteTo(b, m)
 	b.WriteRune(')')
 }
 

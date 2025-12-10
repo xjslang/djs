@@ -7,6 +7,7 @@ import (
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
+	"github.com/xjslang/xjs/srmap"
 	"github.com/xjslang/xjs/token"
 )
 
@@ -24,35 +25,35 @@ type OrExpression struct {
 }
 
 // Override ast.ExpressionStatement.WriteTo
-func (es *ExpressionStatement) WriteTo(b *strings.Builder) {
+func (es *ExpressionStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
 	if stmt, ok := es.Expression.(*OrExpression); ok {
 		b.WriteString("try{")
-		stmt.Exprression.WriteTo(b)
+		stmt.Exprression.WriteTo(b, m)
 		b.WriteString("}catch")
-		stmt.FallbackBlock.WriteTo(b)
+		stmt.FallbackBlock.WriteTo(b, m)
 	} else {
-		es.ExpressionStatement.WriteTo(b)
+		es.ExpressionStatement.WriteTo(b, m)
 	}
 }
 
 // Override ast.LetStatement.WriteTo
-func (ls *LetStatement) WriteTo(b *strings.Builder) {
+func (ls *LetStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
 	if oe, ok := ls.Value.(*OrExpression); ok {
 		b.WriteString("let ")
-		ls.Name.WriteTo(b)
+		ls.Name.WriteTo(b, m)
 		b.WriteString(";try{")
-		ls.Name.WriteTo(b)
+		ls.Name.WriteTo(b, m)
 		b.WriteRune('=')
-		ls.Value.WriteTo(b)
+		ls.Value.WriteTo(b, m)
 		b.WriteString("}catch")
-		oe.FallbackBlock.WriteTo(b)
+		oe.FallbackBlock.WriteTo(b, m)
 	} else {
-		ls.LetStatement.WriteTo(b)
+		ls.LetStatement.WriteTo(b, m)
 	}
 }
 
-func (oe *OrExpression) WriteTo(b *strings.Builder) {
-	oe.Exprression.WriteTo(b)
+func (oe *OrExpression) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
+	oe.Exprression.WriteTo(b, m)
 }
 
 func OrPlugin(pb *parser.Builder) {

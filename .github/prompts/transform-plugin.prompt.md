@@ -55,32 +55,6 @@ func MyTransformPlugin(pb *parser.Builder) {
 }
 ```
 
-## Real example: StrictEqualityPlugin
-
-This plugin transforms weak equality into strict equality:
-
-```go
-func StrictEqualityPlugin(pb *parser.Builder) {
-	lb := pb.LexerBuilder
-	lb.UseTokenInterceptor(func(l *lexer.Lexer, next func() token.Token) token.Token {
-		ret := next()
-		// Transform == to ===
-		if ret.Type == token.EQ && ret.Literal == "==" {
-			ret.Literal = "==="
-		}
-		// Transform != to !==
-		if ret.Type == token.NOT_EQ && ret.Literal == "!=" {
-			ret.Literal = "!=="
-		}
-		return ret
-	})
-}
-```
-
-**What happens:**
-- Input: `1 == 2` → Output: `1 === 2`
-- Input: `x != y` → Output: `x !== y`
-
 ## Common token types
 
 The `xjs` parser provides these token types (among others):
