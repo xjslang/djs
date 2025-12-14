@@ -44,6 +44,13 @@ func run() int {
 		return 1
 	}
 
+	// Convert to absolute path for accurate source maps
+	absInputPath, err := filepath.Abs(inputPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error resolving file path: %v\n", err)
+		return 1
+	}
+
 	if err := ensureNodeAvailable(); err != nil {
 		fmt.Fprintf(os.Stderr, "Node.js not found: %v\n", err)
 		return 1
@@ -71,8 +78,8 @@ func run() int {
 	if sm == nil {
 		sm = &sourcemap.SourceMap{Version: 3}
 	}
-	// Set sources to the original file path and inline content
-	sm.Sources = []string{inputPath}
+	// Set sources to the absolute path for proper error mapping
+	sm.Sources = []string{absInputPath}
 	sm.SourcesContent = []string{string(inputCode)}
 
 	// Determine output file name (for tooling); not strictly needed for inline maps
@@ -94,7 +101,7 @@ func run() int {
 		jsBuilder.WriteString("\n")
 	}
 	// Help debuggers: set a sourceURL for nicer stack display
-	jsBuilder.WriteString("//# sourceURL=" + inputPath + "\n")
+	jsBuilder.WriteString("//# sourceURL=" + absInputPath + "\n")
 	jsBuilder.WriteString("//# sourceMappingURL=data:application/json;charset=utf-8;base64,")
 	jsBuilder.WriteString(b64)
 	jsBuilder.WriteString("\n")
