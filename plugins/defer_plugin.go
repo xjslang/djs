@@ -1,13 +1,10 @@
 package plugins
 
 import (
-	"strings"
-
 	"github.com/rs/xid"
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
-	"github.com/xjslang/xjs/srmap"
 	"github.com/xjslang/xjs/token"
 )
 
@@ -16,15 +13,15 @@ type DeferFunctionDeclaration struct {
 	prefix string
 }
 
-func (fd *DeferFunctionDeclaration) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
-	b.WriteString("function ")
-	fd.Name.WriteTo(b, m)
-	b.WriteRune('(')
+func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
+	cw.WriteString("function ")
+	fd.Name.WriteTo(cw)
+	cw.WriteRune('(')
 	for i, param := range fd.Parameters {
 		if i > 0 {
-			b.WriteRune(',')
+			cw.WriteRune(',')
 		}
-		param.WriteTo(b, m)
+		param.WriteTo(cw)
 	}
 
 	var hasDefers bool
@@ -39,15 +36,15 @@ func (fd *DeferFunctionDeclaration) WriteTo(b *strings.Builder, m *srmap.SourceM
 		deferName := "defers_" + fd.prefix
 		indexName := "i_" + fd.prefix
 		errorName := "e_" + fd.prefix
-		b.WriteString(") {let " + deferName + "=[];try")
-		fd.Body.WriteTo(b, m)
-		b.WriteString("finally{" +
+		cw.WriteString(") {let " + deferName + "=[];try")
+		fd.Body.WriteTo(cw)
+		cw.WriteString("finally{" +
 			"for(let " + indexName + "=" + deferName + ".length;" + indexName + ">0;" + indexName + "--){" +
 			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
 		)
 	} else {
-		b.WriteRune(')')
-		fd.Body.WriteTo(b, m)
+		cw.WriteRune(')')
+		fd.Body.WriteTo(cw)
 	}
 }
 
@@ -56,11 +53,11 @@ type DeferStatement struct {
 	prefix string
 }
 
-func (ds *DeferStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
+func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 	deferName := "defers_" + ds.prefix
-	b.WriteString(deferName + ".push(() =>")
-	ds.Body.WriteTo(b, m)
-	b.WriteRune(')')
+	cw.WriteString(deferName + ".push(() =>")
+	ds.Body.WriteTo(cw)
+	cw.WriteRune(')')
 }
 
 func DeferPlugin(pb *parser.Builder) {

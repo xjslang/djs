@@ -2,12 +2,10 @@ package plugins
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
-	"github.com/xjslang/xjs/srmap"
 	"github.com/xjslang/xjs/token"
 )
 
@@ -25,35 +23,35 @@ type OrExpression struct {
 }
 
 // Override ast.ExpressionStatement.WriteTo
-func (es *ExpressionStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
+func (es *ExpressionStatement) WriteTo(cw *ast.CodeWriter) {
 	if stmt, ok := es.Expression.(*OrExpression); ok {
-		b.WriteString("try{")
-		stmt.Exprression.WriteTo(b, m)
-		b.WriteString("}catch")
-		stmt.FallbackBlock.WriteTo(b, m)
+		cw.WriteString("try{")
+		stmt.Exprression.WriteTo(cw)
+		cw.WriteString("}catch")
+		stmt.FallbackBlock.WriteTo(cw)
 	} else {
-		es.ExpressionStatement.WriteTo(b, m)
+		es.ExpressionStatement.WriteTo(cw)
 	}
 }
 
 // Override ast.LetStatement.WriteTo
-func (ls *LetStatement) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
+func (ls *LetStatement) WriteTo(cw *ast.CodeWriter) {
 	if oe, ok := ls.Value.(*OrExpression); ok {
-		b.WriteString("let ")
-		ls.Name.WriteTo(b, m)
-		b.WriteString(";try{")
-		ls.Name.WriteTo(b, m)
-		b.WriteRune('=')
-		ls.Value.WriteTo(b, m)
-		b.WriteString("}catch")
-		oe.FallbackBlock.WriteTo(b, m)
+		cw.WriteString("let ")
+		ls.Name.WriteTo(cw)
+		cw.WriteString(";try{")
+		ls.Name.WriteTo(cw)
+		cw.WriteRune('=')
+		ls.Value.WriteTo(cw)
+		cw.WriteString("}catch")
+		oe.FallbackBlock.WriteTo(cw)
 	} else {
-		ls.LetStatement.WriteTo(b, m)
+		ls.LetStatement.WriteTo(cw)
 	}
 }
 
-func (oe *OrExpression) WriteTo(b *strings.Builder, m *srmap.SourceMapper) {
-	oe.Exprression.WriteTo(b, m)
+func (oe *OrExpression) WriteTo(cw *ast.CodeWriter) {
+	oe.Exprression.WriteTo(cw)
 }
 
 func OrPlugin(pb *parser.Builder) {

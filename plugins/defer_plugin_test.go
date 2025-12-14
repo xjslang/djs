@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/dop251/goja"
+	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
 )
@@ -35,9 +36,8 @@ func transpileXJSCode(input string) (string, error) {
 	}
 
 	// Convert the AST to JavaScript code (now with automatic semicolons)
-	result := program.String()
-
-	return result, nil
+	result := compiler.New().Compile(program)
+	return result.Code, nil
 }
 
 func executeJavaScript(code string) (string, error) {
