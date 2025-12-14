@@ -64,6 +64,34 @@ func run() int {
 		return 2
 	}
 
+	// Check if we're in transpile-only mode
+	transpileOnly := outputPath != ""
+	hasSourceMap := generateSourceMap || inlineSourceMap
+
+	// Validate --map-root requires --sourcemap (not --inline-sourcemap)
+	if mapRoot != "" && !generateSourceMap {
+		fmt.Fprintln(os.Stderr, "Error: --map-root requires --sourcemap (external source map)")
+		return 2
+	}
+
+	// Validate --inline-sources requires some form of source map
+	if inlineSources && !hasSourceMap {
+		fmt.Fprintln(os.Stderr, "Error: --inline-sources requires --sourcemap or --inline-sourcemap")
+		return 2
+	}
+
+	// Validate --source-root requires some form of source map
+	if sourceRoot != "" && !hasSourceMap {
+		fmt.Fprintln(os.Stderr, "Error: --source-root requires --sourcemap or --inline-sourcemap")
+		return 2
+	}
+
+	// Validate source map flags require transpile mode (-o flag)
+	if !transpileOnly && (generateSourceMap || inlineSourceMap || inlineSources || mapRoot != "" || sourceRoot != "") {
+		fmt.Fprintln(os.Stderr, "Error: source map flags require -o (transpile mode)")
+		return 2
+	}
+
 	inputPath := flag.Arg(0)
 	inputCode, err := ioutil.ReadFile(inputPath)
 	if err != nil {
@@ -77,9 +105,6 @@ func run() int {
 		fmt.Fprintf(os.Stderr, "Error resolving file path: %v\n", err)
 		return 1
 	}
-
-	// Check if we're in transpile-only mode
-	transpileOnly := outputPath != ""
 
 	// Only check for Node if we're going to execute
 	if !transpileOnly {
