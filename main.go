@@ -25,10 +25,16 @@ func main() {
 }
 
 func run() int {
+	var outputPath string
+	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
+
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s <file.djs>\n", filepath.Base(os.Args[0]))
-		fmt.Fprintln(os.Stderr, "Transpiles DJS to JS and executes with Node.")
-		fmt.Fprintln(os.Stderr, "Example: go run . test.djs")
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
+		fmt.Fprintln(os.Stderr, "\nOptions:")
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nExamples:")
+		fmt.Fprintln(os.Stderr, "  go run . test.djs           # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  go run . test.djs -o out.js # Transpile to file")
 	}
 
 	flag.Parse()
@@ -51,9 +57,15 @@ func run() int {
 		return 1
 	}
 
-	if err := ensureNodeAvailable(); err != nil {
-		fmt.Fprintf(os.Stderr, "Node.js not found: %v\n", err)
-		return 1
+	// Check if we're in transpile-only mode
+	transpileOnly := outputPath != ""
+
+	// Only check for Node if we're going to execute
+	if !transpileOnly {
+		if err := ensureNodeAvailable(); err != nil {
+			fmt.Fprintf(os.Stderr, "Node.js not found: %v\n", err)
+			return 1
+		}
 	}
 
 	lb := lexer.NewBuilder()
@@ -69,10 +81,23 @@ func run() int {
 		return 1
 	}
 
-	result := compiler.New().
-		WithSourceMap().
-		Compile(program)
+	// Only generate source map when executing (not when transpiling to file)
+	c := compiler.New()
+	if !transpileOnly {
+		c = c.WithSourceMap()
+	}
+	result := c.Compile(program)
 
+	// Transpile-only mode: write JS to output file (no source map)
+	if transpileOnly {
+		if err := ioutil.WriteFile(outputPath, []byte(result.Code), 0o644); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
+			return 1
+		}
+		return 0
+	}
+
+	// Execute mode: prepare inline source map and run with Node
 	// Enrich SourceMap with source metadata and file name
 	sm := result.SourceMap
 	if sm == nil {
