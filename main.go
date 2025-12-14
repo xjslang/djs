@@ -27,9 +27,11 @@ func main() {
 func run() int {
 	var outputPath string
 	var generateSourceMap bool
+	var inlineSourceMap bool
 	var inlineSources bool
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
+	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
 	flag.BoolVar(&inlineSources, "inline-sources", false, "Include source content in source map")
 
 	flag.Usage = func() {
@@ -37,15 +39,22 @@ func run() int {
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
-		fmt.Fprintln(os.Stderr, "  go run . test.djs                                       # Transpile and execute")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js test.djs                             # Transpile to file")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap test.djs                 # Transpile with source map")
+		fmt.Fprintln(os.Stderr, "  go run . test.djs                                        # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js test.djs                              # Transpile to file")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap test.djs                  # External source map")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --inline-sourcemap test.djs           # Embedded source map")
 		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap --inline-sources test.djs # With embedded sources")
 	}
 
 	flag.Parse()
 	if flag.NArg() < 1 {
 		flag.Usage()
+		return 2
+	}
+
+	// Validate mutually exclusive flags
+	if generateSourceMap && inlineSourceMap {
+		fmt.Fprintln(os.Stderr, "Error: --sourcemap and --inline-sourcemap are mutually exclusive")
 		return 2
 	}
 
@@ -87,17 +96,17 @@ func run() int {
 		return 1
 	}
 
-	// Generate source map when executing OR when explicitly requested with --sourcemap
+	// Generate source map when executing OR when explicitly requested
 	c := compiler.New()
-	if !transpileOnly || generateSourceMap {
+	if !transpileOnly || generateSourceMap || inlineSourceMap {
 		c = c.WithSourceMap()
 	}
 	result := c.Compile(program)
 
 	// Transpile-only mode: write JS to output file
 	if transpileOnly {
-		if generateSourceMap {
-			// Generate external source map file
+		if generateSourceMap || inlineSourceMap {
+			// Prepare source map
 			sm := result.SourceMap
 			if sm == nil {
 				sm = &sourcemap.SourceMap{Version: 3}
@@ -108,31 +117,55 @@ func run() int {
 			}
 			sm.File = filepath.Base(outputPath)
 
-			// Write source map file
-			mapPath := outputPath + ".map"
-			smJSON, jerr := json.MarshalIndent(sm, "", "  ")
-			if jerr != nil {
-				fmt.Fprintf(os.Stderr, "Error serializing source map: %v\n", jerr)
-				return 1
-			}
-			if err := ioutil.WriteFile(mapPath, smJSON, 0o644); err != nil {
-				fmt.Fprintf(os.Stderr, "Error writing source map file: %v\n", err)
-				return 1
-			}
+			if generateSourceMap {
+				// External source map file
+				mapPath := outputPath + ".map"
+				smJSON, jerr := json.MarshalIndent(sm, "", "  ")
+				if jerr != nil {
+					fmt.Fprintf(os.Stderr, "Error serializing source map: %v\n", jerr)
+					return 1
+				}
+				if err := ioutil.WriteFile(mapPath, smJSON, 0o644); err != nil {
+					fmt.Fprintf(os.Stderr, "Error writing source map file: %v\n", err)
+					return 1
+				}
 
-			// Write JS file with source map reference
-			var jsBuilder strings.Builder
-			jsBuilder.WriteString(result.Code)
-			if !strings.HasSuffix(result.Code, "\n") {
+				// Write JS file with external source map reference
+				var jsBuilder strings.Builder
+				jsBuilder.WriteString(result.Code)
+				if !strings.HasSuffix(result.Code, "\n") {
+					jsBuilder.WriteString("\n")
+				}
+				jsBuilder.WriteString("//# sourceMappingURL=")
+				jsBuilder.WriteString(filepath.Base(mapPath))
 				jsBuilder.WriteString("\n")
-			}
-			jsBuilder.WriteString("//# sourceMappingURL=")
-			jsBuilder.WriteString(filepath.Base(mapPath))
-			jsBuilder.WriteString("\n")
 
-			if err := ioutil.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
-				fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
-				return 1
+				if err := ioutil.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
+					fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
+					return 1
+				}
+			} else if inlineSourceMap {
+				// Inline source map (base64 embedded)
+				smJSON, jerr := json.Marshal(sm)
+				if jerr != nil {
+					fmt.Fprintf(os.Stderr, "Error serializing source map: %v\n", jerr)
+					return 1
+				}
+				b64 := base64.StdEncoding.EncodeToString(smJSON)
+
+				var jsBuilder strings.Builder
+				jsBuilder.WriteString(result.Code)
+				if !strings.HasSuffix(result.Code, "\n") {
+					jsBuilder.WriteString("\n")
+				}
+				jsBuilder.WriteString("//# sourceMappingURL=data:application/json;charset=utf-8;base64,")
+				jsBuilder.WriteString(b64)
+				jsBuilder.WriteString("\n")
+
+				if err := ioutil.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
+					fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
+					return 1
+				}
 			}
 		} else {
 			// Write JS file without source map
