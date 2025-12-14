@@ -29,21 +29,24 @@ func run() int {
 	var generateSourceMap bool
 	var inlineSourceMap bool
 	var inlineSources bool
+	var sourceRoot string
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
 	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
 	flag.BoolVar(&inlineSources, "inline-sources", false, "Include source content in source map")
+	flag.StringVar(&sourceRoot, "source-root", "", "Root path for source map URL and source files")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
-		fmt.Fprintln(os.Stderr, "  go run . test.djs                                        # Transpile and execute")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js test.djs                              # Transpile to file")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap test.djs                  # External source map")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js --inline-sourcemap test.djs           # Embedded source map")
-		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap --inline-sources test.djs # With embedded sources")
+		fmt.Fprintln(os.Stderr, "  go run . test.djs                                             # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js test.djs                                   # Transpile to file")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap test.djs                       # External source map")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --inline-sourcemap test.djs                # Embedded source map")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap --inline-sources test.djs      # With embedded sources")
+		fmt.Fprintln(os.Stderr, "  go run . -o out.js --sourcemap --source-root /maps/ test.djs  # Custom source root")
 	}
 
 	flag.Parse()
@@ -115,6 +118,9 @@ func run() int {
 			if inlineSources {
 				sm.SourcesContent = []string{string(inputCode)}
 			}
+			if sourceRoot != "" {
+				sm.SourceRoot = sourceRoot
+			}
 			sm.File = filepath.Base(outputPath)
 
 			if generateSourceMap {
@@ -137,6 +143,12 @@ func run() int {
 					jsBuilder.WriteString("\n")
 				}
 				jsBuilder.WriteString("//# sourceMappingURL=")
+				if sourceRoot != "" {
+					jsBuilder.WriteString(sourceRoot)
+					if !strings.HasSuffix(sourceRoot, "/") {
+						jsBuilder.WriteString("/")
+					}
+				}
 				jsBuilder.WriteString(filepath.Base(mapPath))
 				jsBuilder.WriteString("\n")
 
