@@ -1,4 +1,4 @@
-# DeferJavaScript (DJS)
+# Defer for JavaScript (DJS)
 
 A JavaScript dialect that adds Go-style `defer` statements, error-handling `or` blocks, and strict equality by default.
 
