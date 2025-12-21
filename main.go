@@ -118,6 +118,7 @@ func run() int {
 		Install(plugins.DeferPlugin).
 		Install(plugins.OrPlugin).
 		Install(plugins.StrictEqualityPlugin).
+		Install(plugins.NewPlugin).
 		Build(string(inputCode))
 
 	program, perr := p.ParseProgram()
