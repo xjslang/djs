@@ -53,7 +53,7 @@ func run() int {
 	}
 
 	flag.Parse()
-	if flag.NArg() < 1 {
+	if flag.NArg() != 1 {
 		flag.Usage()
 		return 2
 	}
