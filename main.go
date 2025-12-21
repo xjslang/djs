@@ -6,7 +6,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -93,7 +92,7 @@ func run() int {
 	}
 
 	inputPath := flag.Arg(0)
-	inputCode, err := ioutil.ReadFile(inputPath)
+	inputCode, err := os.ReadFile(inputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 		return 1
@@ -160,7 +159,7 @@ func run() int {
 					fmt.Fprintf(os.Stderr, "Error serializing source map: %v\n", jerr)
 					return 1
 				}
-				if err := ioutil.WriteFile(mapPath, smJSON, 0o644); err != nil {
+				if err := os.WriteFile(mapPath, smJSON, 0o644); err != nil {
 					fmt.Fprintf(os.Stderr, "Error writing source map file: %v\n", err)
 					return 1
 				}
@@ -182,7 +181,7 @@ func run() int {
 				jsBuilder.WriteString(filepath.Base(mapPath))
 				jsBuilder.WriteString("\n")
 
-				if err := ioutil.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
+				if err := os.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
 					fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 					return 1
 				}
@@ -204,14 +203,14 @@ func run() int {
 				jsBuilder.WriteString(b64)
 				jsBuilder.WriteString("\n")
 
-				if err := ioutil.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
+				if err := os.WriteFile(outputPath, []byte(jsBuilder.String()), 0o644); err != nil {
 					fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 					return 1
 				}
 			}
 		} else {
 			// Write JS file without source map
-			if err := ioutil.WriteFile(outputPath, []byte(result.Code), 0o644); err != nil {
+			if err := os.WriteFile(outputPath, []byte(result.Code), 0o644); err != nil {
 				fmt.Fprintf(os.Stderr, "Error writing output file: %v\n", err)
 				return 1
 			}
@@ -302,7 +301,7 @@ func writeTempJS(outFileName, content string) (string, error) {
 	// Use the OS temp dir but provide a stable-ish name for readability
 	tmpDir := os.TempDir()
 	tmpPath := filepath.Join(tmpDir, outFileName)
-	if err := ioutil.WriteFile(tmpPath, []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(tmpPath, []byte(content), 0o644); err != nil {
 		return "", err
 	}
 	return tmpPath, nil
