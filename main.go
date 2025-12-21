@@ -119,6 +119,7 @@ func run() int {
 		Install(plugins.OrPlugin).
 		Install(plugins.StrictEqualityPlugin).
 		Install(plugins.NewPlugin).
+		Install(plugins.ThrowPlugin).
 		Build(string(inputCode))
 
 	program, perr := p.ParseProgram()
