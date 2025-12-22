@@ -48,6 +48,49 @@ func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
 	}
 }
 
+type DeferFunctionExpression struct {
+	*ast.FunctionExpression
+	prefix string
+}
+
+func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
+	cw.WriteString("function")
+	if fe.Name != nil {
+		cw.WriteRune(' ')
+		fe.Name.WriteTo(cw)
+	}
+	cw.WriteRune('(')
+	for i, param := range fe.Parameters {
+		if i > 0 {
+			cw.WriteRune(',')
+		}
+		param.WriteTo(cw)
+	}
+
+	var hasDefers bool
+	for _, stmt := range fe.Body.Statements {
+		if _, ok := stmt.(*DeferStatement); ok {
+			hasDefers = true
+			break
+		}
+	}
+
+	if hasDefers {
+		deferName := "defers_" + fe.prefix
+		indexName := "i_" + fe.prefix
+		errorName := "e_" + fe.prefix
+		cw.WriteString(") {let " + deferName + "=[];try")
+		fe.Body.WriteTo(cw)
+		cw.WriteString("finally{" +
+			"for(let " + indexName + "=" + deferName + ".length;" + indexName + ">0;" + indexName + "--){" +
+			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
+		)
+	} else {
+		cw.WriteRune(')')
+		fe.Body.WriteTo(cw)
+	}
+}
+
 type DeferStatement struct {
 	Body   *ast.BlockStatement
 	prefix string
@@ -80,6 +123,20 @@ func DeferPlugin(pb *parser.Builder) {
 			prefix:              id.String(),
 			FunctionDeclaration: p.ParseFunctionStatement(),
 		}
+	})
+	pb.UseExpressionInterceptor(func(p *parser.Parser, next func() ast.Expression) ast.Expression {
+		if p.CurrentToken.Type != token.FUNCTION {
+			return next()
+		}
+
+		expr := p.ParseFunctionExpression()
+		if fe, ok := expr.(*ast.FunctionExpression); ok {
+			return &DeferFunctionExpression{
+				prefix:             id.String(),
+				FunctionExpression: fe,
+			}
+		}
+		return expr
 	})
 	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
 		if p.CurrentToken.Type != deferTokenType {
