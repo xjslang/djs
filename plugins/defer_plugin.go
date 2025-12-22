@@ -8,16 +8,15 @@ import (
 	"github.com/xjslang/xjs/token"
 )
 
-type DeferFunctionDeclaration struct {
-	*ast.FunctionDeclaration
-	prefix string
-}
-
-func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
-	cw.WriteString("function ")
-	fd.Name.WriteTo(cw)
+// writeFunctionWithDefers writes a function with defer support
+func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameters []*ast.Identifier, body *ast.BlockStatement, prefix string) {
+	cw.WriteString("function")
+	if name != nil {
+		cw.WriteRune(' ')
+		name.WriteTo(cw)
+	}
 	cw.WriteRune('(')
-	for i, param := range fd.Parameters {
+	for i, param := range parameters {
 		if i > 0 {
 			cw.WriteRune(',')
 		}
@@ -25,7 +24,7 @@ func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
 	}
 
 	var hasDefers bool
-	for _, stmt := range fd.Body.Statements {
+	for _, stmt := range body.Statements {
 		if _, ok := stmt.(*DeferStatement); ok {
 			hasDefers = true
 			break
@@ -33,19 +32,28 @@ func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
 	}
 
 	if hasDefers {
-		deferName := "defers_" + fd.prefix
-		indexName := "i_" + fd.prefix
-		errorName := "e_" + fd.prefix
+		deferName := "defers_" + prefix
+		indexName := "i_" + prefix
+		errorName := "e_" + prefix
 		cw.WriteString(") {let " + deferName + "=[];try")
-		fd.Body.WriteTo(cw)
+		body.WriteTo(cw)
 		cw.WriteString("finally{" +
 			"for(let " + indexName + "=" + deferName + ".length;" + indexName + ">0;" + indexName + "--){" +
 			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
 		)
 	} else {
 		cw.WriteRune(')')
-		fd.Body.WriteTo(cw)
+		body.WriteTo(cw)
 	}
+}
+
+type DeferFunctionDeclaration struct {
+	*ast.FunctionDeclaration
+	prefix string
+}
+
+func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
+	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.prefix)
 }
 
 type DeferFunctionExpression struct {
@@ -54,41 +62,7 @@ type DeferFunctionExpression struct {
 }
 
 func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
-	cw.WriteString("function")
-	if fe.Name != nil {
-		cw.WriteRune(' ')
-		fe.Name.WriteTo(cw)
-	}
-	cw.WriteRune('(')
-	for i, param := range fe.Parameters {
-		if i > 0 {
-			cw.WriteRune(',')
-		}
-		param.WriteTo(cw)
-	}
-
-	var hasDefers bool
-	for _, stmt := range fe.Body.Statements {
-		if _, ok := stmt.(*DeferStatement); ok {
-			hasDefers = true
-			break
-		}
-	}
-
-	if hasDefers {
-		deferName := "defers_" + fe.prefix
-		indexName := "i_" + fe.prefix
-		errorName := "e_" + fe.prefix
-		cw.WriteString(") {let " + deferName + "=[];try")
-		fe.Body.WriteTo(cw)
-		cw.WriteString("finally{" +
-			"for(let " + indexName + "=" + deferName + ".length;" + indexName + ">0;" + indexName + "--){" +
-			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
-		)
-	} else {
-		cw.WriteRune(')')
-		fe.Body.WriteTo(cw)
-	}
+	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.prefix)
 }
 
 type DeferStatement struct {
