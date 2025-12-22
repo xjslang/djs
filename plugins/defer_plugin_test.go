@@ -113,17 +113,22 @@ func RunTranspilationTest(t *testing.T, test TranspilationTest) {
 }
 
 func TestTranspilation(t *testing.T) {
-	// Dynamically discover test cases by reading .djs files from testdata directory
-	files, err := os.ReadDir(testDataDir)
-	if err != nil {
-		t.Fatalf("Failed to read testdata directory: %v", err)
-	}
-
+	// discover test cases by recursively
 	var testCases []string
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".djs") {
+	err := filepath.WalkDir(testDataDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".djs") {
+			// Get relative path from testDataDir
+			relPath, err := filepath.Rel(testDataDir, path)
+			if err != nil {
+				return err
+			}
+
 			// Remove .djs extension to get the test case name
-			testCaseName := strings.TrimSuffix(file.Name(), ".djs")
+			testCaseName := strings.TrimSuffix(relPath, ".djs")
 
 			// Check if corresponding .output file exists
 			outputFile := filepath.Join(testDataDir, testCaseName+".output")
@@ -131,6 +136,10 @@ func TestTranspilation(t *testing.T) {
 				testCases = append(testCases, testCaseName)
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Failed to walk testdata directory: %v", err)
 	}
 
 	if len(testCases) == 0 {
