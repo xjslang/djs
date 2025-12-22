@@ -67,7 +67,7 @@ func executeJavaScript(code string) (string, error) {
 }
 
 func loadTestCase(t *testing.T, baseName string) TranspilationTest {
-	inputFile := filepath.Join(testDataDir, baseName+".js")
+	inputFile := filepath.Join(testDataDir, baseName+".djs")
 	outputFile := filepath.Join(testDataDir, baseName+".output")
 
 	// Read input file
@@ -113,7 +113,7 @@ func RunTranspilationTest(t *testing.T, test TranspilationTest) {
 }
 
 func TestTranspilation(t *testing.T) {
-	// Dynamically discover test cases by reading .js files from testdata directory
+	// Dynamically discover test cases by reading .djs files from testdata directory
 	files, err := os.ReadDir(testDataDir)
 	if err != nil {
 		t.Fatalf("Failed to read testdata directory: %v", err)
@@ -121,9 +121,9 @@ func TestTranspilation(t *testing.T) {
 
 	var testCases []string
 	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".js") {
-			// Remove .js extension to get the test case name
-			testCaseName := strings.TrimSuffix(file.Name(), ".js")
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".djs") {
+			// Remove .djs extension to get the test case name
+			testCaseName := strings.TrimSuffix(file.Name(), ".djs")
 
 			// Check if corresponding .output file exists
 			outputFile := filepath.Join(testDataDir, testCaseName+".output")
