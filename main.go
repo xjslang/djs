@@ -115,6 +115,7 @@ func run() int {
 
 	lb := lexer.NewBuilder()
 	p := parser.NewBuilder(lb).
+		Install(plugins.MainPlugin).
 		Install(plugins.DeferPlugin).
 		Install(plugins.OrPlugin).
 		Install(plugins.StrictEqualityPlugin).
