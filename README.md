@@ -8,6 +8,7 @@ Below is an example of how DJS transpiles to standard JavaScript:
 
 **Original code:**
 ```js
+// input.djs
 let sqlite = require('better-sqlite3')
 
 function main() {
@@ -28,6 +29,7 @@ main()
 
 **Transpiled code:**
 ```js
+// output.js
 let sqlite = require("better-sqlite3");
 
 function main() {
