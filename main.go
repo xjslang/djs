@@ -15,7 +15,7 @@ import (
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/sourcemap"
 
-	"github.com/xjslang/djs/builder"
+	djsbuilder "github.com/xjslang/djs/builder"
 )
 
 func main() {
@@ -113,7 +113,7 @@ func run() int {
 	}
 
 	lb := lexer.NewBuilder()
-	p := builder.New(lb).Build(string(inputCode))
+	p := djsbuilder.New(lb).Build(string(inputCode))
 
 	program, perr := p.ParseProgram()
 	if perr != nil {
