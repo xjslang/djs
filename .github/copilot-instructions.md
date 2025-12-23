@@ -1,4 +1,52 @@
-# DJS (DeferJavaScript) - AI Coding Agent Instructions
+# DJS (Defers for JavaScript) - AI Coding Agent Instructions
+
+DJS (Defers for JavaScript) is a partial implementation of JavaScript that incorporates the `defer` and `go` constructs. For example:
+
+```djs
+let sqlite = require('better-sqlite3')
+
+(function main() {
+  let db = sqlite('mydata.db') or |err| {
+    console.log('Cannot connect to database', err)
+    return
+  }
+  defer db.close()
+
+  // prepare and execute queries
+  let stmt = db.prepare('SELECT * FROM users WHERE active = ?');
+  let users = stmt.all(1);
+  console.log(`Found ${users.length} active users`);
+})()
+```
+
+DJS is built on top of the [XJS](https://github.com/xjslang/xjs) tool, a JavaScript parser that allows new constructs to be incorporated into the language through the use of plugins. For example:
+
+```djs
+input := `console.log('Hello, world!')`
+program, _ := parser.NewBuilder(lb).
+  // plugins are executed in the same order they have been installed (FIFO)
+	Install(plugins.DeferPlugin).
+	Install(plugins.OrPlugin).
+	Install(plugins.StrictEqualityPlugin).
+	Install(plugins.NewPlugin).
+	Install(plugins.ThrowPlugin).
+  // create the parser and parse the `input` source to generate the AST
+  Build(input).
+  ParserProgram()
+
+// finally, compile the AST to code
+result, _ := compiler.New().Compile(program)
+fmt.Println(result.Code)
+```
+
+It is important to note that `XJS` is not a complete implementation of JavaScript, and therefore only supports a limited number of features. For example:
+
+- Only `let` is accepted; `const` and `var` are not allowed.
+- Only single-line comments `//` are accepted. Multi-line comments `/* .. */` are not allowed.
+- Semicolons are not required.
+- `==` are transpiled to `===`. And `===` is not allowed.
+
+This is done on purpose, since the goal of `XJS` is to maintain "sufficient and necessary" structures, while allowing the developer to incorporate new and genuine, not necessarily standard, constructs such as `defer` or `or`.
 
 # General Project Instructions
 
