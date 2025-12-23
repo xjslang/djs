@@ -4,7 +4,7 @@ This example demonstrates how `defer` simplifies database cleanup.
 
 ## Setup
 ```bash
-npm install better-sqlite3
+npm install
 node setup.js  # Creates sample database
 ```
 
