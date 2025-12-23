@@ -1,6 +1,6 @@
 let sqlite = require('better-sqlite3')
 
-(function main() {
+function main() {
   let db = sqlite('mydata.db') or |err| {
     console.log('Cannot connect to database', err)
     return
@@ -11,4 +11,6 @@ let sqlite = require('better-sqlite3')
   let stmt = db.prepare('SELECT * FROM users WHERE active = ?');
   let users = stmt.all(1);
   console.log(`Found ${users.length} active users`);
-})()
+}
+
+main()

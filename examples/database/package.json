@@ -1,5 +1,10 @@
 {
   "dependencies": {
     "better-sqlite3": "^12.5.0"
+  },
+  "scripts": {
+    "setup": "node setup.js",
+    "build": "djs -o example.js example.djs",
+    "start": "npm run build && node example.js"
   }
 }
