@@ -8,6 +8,7 @@ import (
 
 func New(lb *lexer.Builder) *parser.Builder {
 	return parser.NewBuilder(lb).
+		WithSmartSemicolon(true).
 		Install(plugins.DeferPlugin).
 		Install(plugins.OrPlugin).
 		Install(plugins.StrictEqualityPlugin).
