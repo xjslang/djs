@@ -1,0 +1,5 @@
+Transaction started: 123
+Processing transaction: 123
+Committing transaction: 123
+---
+Failed to start transaction: Invalid transaction ID

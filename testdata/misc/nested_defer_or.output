@@ -1,0 +1,5 @@
+Connected: main
+Lock acquired: resource1
+Performing operation
+Lock released: resource1
+Disconnected: main

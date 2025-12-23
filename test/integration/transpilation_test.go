@@ -31,7 +31,13 @@ func normalizeLineEndings(s string) string {
 
 func transpileXJSCode(input string) (string, error) {
 	lb := lexer.NewBuilder()
-	p := parser.NewBuilder(lb).Install(plugins.DeferPlugin).Build(input)
+	p := parser.NewBuilder(lb).
+		Install(plugins.DeferPlugin).
+		Install(plugins.OrPlugin).
+		Install(plugins.StrictEqualityPlugin).
+		Install(plugins.NewPlugin).
+		Install(plugins.ThrowPlugin).
+		Build(input)
 	program, err := p.ParseProgram()
 	if err != nil {
 		return "", fmt.Errorf("ParseProgram error: %v", err)
