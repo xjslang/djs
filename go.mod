@@ -6,7 +6,7 @@ require (
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/magefile/mage v1.15.0
 	github.com/rs/xid v1.6.0
-	github.com/xjslang/xjs v0.2.0
+	github.com/xjslang/xjs v0.3.0
 )
 
 require (
