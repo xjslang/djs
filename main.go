@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rs/xid"
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/sourcemap"
@@ -251,7 +252,9 @@ func run() int {
 	finalJS := jsBuilder.String()
 
 	// Write to a temporary JS file so Node can execute it with source maps
-	tmpFile, terr := writeTempJS(outFile, finalJS)
+	// Use the directory of the original DJS file to preserve require() resolution
+	inputDir := filepath.Dir(absInputPath)
+	tmpFile, terr := writeTempJS(inputDir, outFile, finalJS)
 	if terr != nil {
 		fmt.Fprintf(os.Stderr, "Error writing temp JS: %v\n", terr)
 		return 1
@@ -292,10 +295,13 @@ func deriveOutputFilename(inputPath string) string {
 	return name + ".transpiled.js"
 }
 
-func writeTempJS(outFileName, content string) (string, error) {
-	// Use the OS temp dir but provide a stable-ish name for readability
-	tmpDir := os.TempDir()
-	tmpPath := filepath.Join(tmpDir, outFileName)
+func writeTempJS(baseDir, outFileName, content string) (string, error) {
+	// Write temp file in the same directory as the original DJS file
+	// so Node.js can resolve relative requires and local node_modules
+	ext := filepath.Ext(outFileName)
+	base := strings.TrimSuffix(outFileName, ext)
+	uniqueFileName := base + "." + xid.New().String() + ext
+	tmpPath := filepath.Join(baseDir, uniqueFileName)
 	if err := os.WriteFile(tmpPath, []byte(content), 0o644); err != nil {
 		return "", err
 	}
