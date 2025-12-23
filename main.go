@@ -13,10 +13,9 @@ import (
 
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
-	"github.com/xjslang/xjs/parser"
 	"github.com/xjslang/xjs/sourcemap"
 
-	"github.com/xjslang/djs/plugins"
+	"github.com/xjslang/djs/builder"
 )
 
 func main() {
@@ -114,13 +113,7 @@ func run() int {
 	}
 
 	lb := lexer.NewBuilder()
-	p := parser.NewBuilder(lb).
-		Install(plugins.DeferPlugin).
-		Install(plugins.OrPlugin).
-		Install(plugins.StrictEqualityPlugin).
-		Install(plugins.NewPlugin).
-		Install(plugins.ThrowPlugin).
-		Build(string(inputCode))
+	p := builder.New(lb).Build(string(inputCode))
 
 	program, perr := p.ParseProgram()
 	if perr != nil {

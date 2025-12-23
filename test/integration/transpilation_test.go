@@ -10,9 +10,8 @@ import (
 	"github.com/dop251/goja"
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
-	"github.com/xjslang/xjs/parser"
 
-	"github.com/xjslang/djs/plugins"
+	djsbuilder "github.com/xjslang/djs/builder"
 )
 
 const testDataDir = "../../testdata"
@@ -31,13 +30,7 @@ func normalizeLineEndings(s string) string {
 
 func transpileXJSCode(input string) (string, error) {
 	lb := lexer.NewBuilder()
-	p := parser.NewBuilder(lb).
-		Install(plugins.DeferPlugin).
-		Install(plugins.OrPlugin).
-		Install(plugins.StrictEqualityPlugin).
-		Install(plugins.NewPlugin).
-		Install(plugins.ThrowPlugin).
-		Build(input)
+	p := djsbuilder.New(lb).Build(input)
 	program, err := p.ParseProgram()
 	if err != nil {
 		return "", fmt.Errorf("ParseProgram error: %v", err)
