@@ -1,6 +1,64 @@
 # Defer for JavaScript (DJS)
 
-A JavaScript dialect that adds Go-style `defer` statements, error-handling `or` blocks, and strict equality by default.
+DJS is a JavaScript dialect that simplifies resource management using the `defer` and `or` constructs, eliminating the verbosity of `try/catch/finally`. It is ideal for the DevOps Community, where proper resource cleanup is critical.
+
+DJS is built on top of [XJS](https://github.com/xjslang/xjs), a super-fast, minimalist, and extensible JavaScript parser powered by plugins.
+
+Below is an example of how DJS transpiles to standard JavaScript:
+
+**Original code:**
+```js
+let sqlite = require('better-sqlite3')
+
+function main() {
+  let db = sqlite('mydata.db') or |err| {
+    console.log('Cannot connect to database', err)
+    return
+  }
+  defer db.close()
+
+  // prepare and execute queries
+  let stmt = db.prepare('SELECT * FROM users WHERE active = ?');
+  let users = stmt.all(1);
+  console.log(`Found ${users.length} active users`);
+}
+
+main()
+```
+
+**Transpiled code:**
+```js
+let sqlite = require("better-sqlite3");
+
+function main() {
+  let defers = [];
+  try {
+    let db;
+    try {
+      db = sqlite("mydata.db");
+    } catch (err) {
+      console.log("Cannot connect to database", err);
+      return;
+    }
+    defers.push(() => {
+      db.close();
+    });
+    let stmt = db.prepare("SELECT * FROM users WHERE active = ?");
+    let users = stmt.all(1);
+    console.log(`Found ${users.length} active users`);
+  } finally {
+    for (let i = defers.length; i > 0; i--) {
+      try {
+        defers[i - 1]();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
+}
+
+main();
+```
 
 ## Features
 
