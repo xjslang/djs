@@ -13,32 +13,12 @@ go install github.com/xjslang/djs@latest
 
 ## Run the Example
 
-### Quick Start
-
 ```bash
 # Terminal 1: Start the test server
 npm run server
 
 # Terminal 2: Transpile and run the example
 npm start
-```
-
-### Step by Step
-
-```bash
-# Terminal 1: Start the HTTP server
-npm run server
-
-# Terminal 2: Build and run
-npm run build  # Transpile example.djs → example.js
-node example.js
-```
-
-### Automated Test
-
-```bash
-# Run the full integration test
-npm test
 ```
 
 This will automatically start the server, run the example, and stop the server.
