@@ -4,7 +4,7 @@
   "description": "Example demonstrating HTTP resource cleanup with DJS defer and or constructs",
   "scripts": {
     "server": "node server.js",
-    "build": "cd ../.. && go run . -o examples/http-cleanup/example.js examples/http-cleanup/example.djs",
+    "build": "djs -o example.js example.djs",
     "start": "npm run build && node example.js",
     "test": "node test.js",
     "clean": "rm -f example.js"
