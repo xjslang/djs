@@ -1,0 +1,9 @@
+node_modules
+
+# generated files
+package-lock.json
+*.db
+*.js
+
+# except setup.js which is needed
+!setup.js
