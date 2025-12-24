@@ -4,6 +4,7 @@ node_modules
 package-lock.json
 *.db
 *.js
+*.log
 
 # except setup.js which is needed
 !setup.js
