@@ -1,0 +1,13 @@
+{
+  "name": "djs-timers-intervals-example",
+  "version": "1.0.0",
+  "description": "DJS example demonstrating defer with timers and intervals",
+  "scripts": {
+    "build": "djs -o example.js example.djs",
+    "start": "node example.js",
+    "dev": "npm run build && npm start"
+  },
+  "keywords": ["djs", "defer", "timers", "intervals", "setTimeout", "setInterval"],
+  "author": "",
+  "license": "MIT"
+}
