@@ -48,6 +48,53 @@ It is important to note that `XJS` is not a complete implementation of JavaScrip
 
 This is done on purpose, since the goal of `XJS` is to maintain "sufficient and necessary" structures, while allowing the developer to incorporate new and genuine, not necessarily standard, constructs such as `defer` or `or`.
 
+## Intentional Language Limitations
+
+DJS intentionally omits several modern JavaScript features. These are **design decisions, not bugs or missing features**. The language follows a minimalist philosophy where the community will decide what to add as it evolves. When writing DJS code:
+
+### Not Supported (Intentional)
+- **No destructuring assignment**: `let { a, b } = obj` is not allowed
+  - Use explicit property access: `let a = obj.a; let b = obj.b`
+- **No arrow functions**: `() => {}` is not allowed
+  - Use regular functions: `function() {}`
+- **No `const` or `var`**: Only `let` is supported
+  - Use `let` for all variable declarations
+- **No classes**: Use functions and prototypes instead
+- **No `try/catch`**: Use the `or` construct for error handling
+- **No `try/finally`**: Use the `defer` construct instead
+- **No template literals in some contexts**: May need string concatenation
+
+### Writing DJS-Compatible Code
+
+When creating examples or writing DJS code:
+
+```djs
+// ❌ Don't use destructuring
+let { spawn } = require('child_process')
+
+// ✅ Do use explicit access
+let childProcess = require('child_process')
+let spawn = childProcess.spawn
+
+// ❌ Don't use arrow functions
+setTimeout(() => console.log('done'), 1000)
+
+// ✅ Do use regular functions
+setTimeout(function() {
+  console.log('done')
+}, 1000)
+
+// ❌ Don't use const
+const MAX_RETRIES = 3
+
+// ✅ Do use let
+let MAX_RETRIES = 3
+```
+
+### Philosophy
+
+These limitations are **intentional** and align with DJS's goal of providing a minimal, sufficient JavaScript subset. Many users prefer avoiding redundant language constructs. The language is still evolving, and if successful, the community will decide what features to add based on real-world needs, not completeness for its own sake.
+
 # General Project Instructions
 
 ## Language
