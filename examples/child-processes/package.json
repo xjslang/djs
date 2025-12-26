@@ -1,0 +1,13 @@
+{
+  "name": "djs-child-processes-example",
+  "version": "1.0.0",
+  "description": "DJS example demonstrating defer with child processes",
+  "scripts": {
+    "build": "djs -o example.js example.djs",
+    "start": "node example.js",
+    "dev": "npm run build && npm start"
+  },
+  "keywords": ["djs", "defer", "child-process", "spawn", "process-management"],
+  "author": "",
+  "license": "MIT"
+}
