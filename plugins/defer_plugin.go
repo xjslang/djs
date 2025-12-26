@@ -117,7 +117,7 @@ func DeferPlugin(pb *parser.Builder) {
 		return ret
 	})
 
-	pb.RegisterPrefixOperator(awaitToken, func(tok token.Token, right func() ast.Expression) ast.Expression {
+	_ = pb.RegisterPrefixOperator(awaitToken, func(tok token.Token, right func() ast.Expression) ast.Expression {
 		return &AwaitExpression{
 			Right: right(),
 		}
