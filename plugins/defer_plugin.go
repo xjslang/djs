@@ -85,11 +85,21 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 	cw.WriteRune(')')
 }
 
+type AwaitExpression struct {
+	Right ast.Expression
+}
+
+func (ae *AwaitExpression) WriteTo(cw *ast.CodeWriter) {
+	cw.WriteString("await ")
+	ae.Right.WriteTo(cw)
+}
+
 func DeferPlugin(pb *parser.Builder) {
 	id := xid.New()
 	lb := pb.LexerBuilder
 	deferToken := lb.RegisterTokenType("DEFER")
 	asyncToken := lb.RegisterTokenType("ASYNC")
+	awaitToken := lb.RegisterTokenType("AWAIT")
 
 	lb.UseTokenInterceptor(func(l *lexer.Lexer, next func() token.Token) token.Token {
 		ret := next()
@@ -101,8 +111,16 @@ func DeferPlugin(pb *parser.Builder) {
 			ret.Type = deferToken
 		case "async":
 			ret.Type = asyncToken
+		case "await":
+			ret.Type = awaitToken
 		}
 		return ret
+	})
+
+	pb.RegisterPrefixOperator(awaitToken, func(p *parser.Parser, tok token.Token, right func() ast.Expression) ast.Expression {
+		return &AwaitExpression{
+			Right: right(),
+		}
 	})
 
 	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
