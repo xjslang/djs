@@ -9,9 +9,7 @@ async function fetchUserData() {
   defer {
     console.log('\nCleaning up resources...')
     agent.destroy()
-    console.log('✓ HTTP agent destroyed')
     fs.closeSync(logFile)
-    console.log('✓ Log file closed\n')
   }
 
   fs.writeSync(logFile, `[${new Date().toISOString()}] Starting HTTP requests\n`)
