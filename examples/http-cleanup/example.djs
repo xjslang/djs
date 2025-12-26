@@ -2,9 +2,9 @@ let http = require('http')
 let fs = require('fs')
 
 // Global resources
-let logFile = fs.openSync('request.log', 'w')
 
 async function fetchUserData() {
+  let logFile = fs.openSync('request.log', 'w')
   let agent = new http.Agent({ keepAlive: true, maxSockets: 10 })
   defer {
     console.log('\nCleaning up resources...')
