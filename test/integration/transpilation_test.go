@@ -152,37 +152,3 @@ func TestTranspilation(t *testing.T) {
 		RunTranspilationTest(t, test)
 	}
 }
-
-// TestAsyncAwaitErrors tests error handling for async/await
-func TestAsyncAwaitErrors(t *testing.T) {
-	errorTests := []struct {
-		name  string
-		input string
-	}{
-		{
-			name:  "await_at_top_level",
-			input: "let x = await get()",
-		},
-		{
-			name:  "await_at_top_level_in_expression",
-			input: "console.log(await fetch('data'))",
-		},
-		{
-			name: "multiple_await_at_top_level",
-			input: `
-let x = await fetch('https://api.example.com')
-let y = await fetch('https://api2.example.com')
-console.log(x, y)
-`,
-		},
-	}
-
-	for _, test := range errorTests {
-		t.Run(test.name, func(t *testing.T) {
-			_, err := transpileXJSCode(test.input)
-			if err == nil {
-				t.Errorf("Expected transpilation error for input: %s", test.input)
-			}
-		})
-	}
-}

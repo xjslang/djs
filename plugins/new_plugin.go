@@ -44,7 +44,7 @@ func NewPlugin(pb *parser.Builder) {
 	})
 
 	// Register 'new' as a prefix operator
-	pb.RegisterPrefixOperator(newTokenType, func(p *parser.Parser, tok token.Token, right func() ast.Expression) ast.Expression {
+	pb.RegisterPrefixOperator(newTokenType, func(tok token.Token, right func() ast.Expression) ast.Expression {
 		expr := &NewExpression{
 			Token:     tok,
 			Arguments: []ast.Expression{},
