@@ -103,24 +103,15 @@ func DeferPlugin(pb *parser.Builder) {
 	})
 
 	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
-		if p.CurrentToken.Type != token.FUNCTION {
+		asyncFn := p.CurrentToken.Type == asyncToken
+		if p.CurrentToken.Type != token.FUNCTION && !asyncFn {
 			return next()
 		}
-
-		return &DeferFunctionDeclaration{
-			prefix:              id.String(),
-			FunctionDeclaration: p.ParseFunctionStatement(),
+		if asyncFn {
+			p.NextToken() // consume 'async'
 		}
-	})
-
-	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
-		if p.CurrentToken.Type != asyncToken {
-			return next()
-		}
-
-		p.NextToken() // consume 'async'
 		return &DeferFunctionDeclaration{
-			async:               true,
+			async:               asyncFn,
 			prefix:              id.String(),
 			FunctionDeclaration: p.ParseFunctionStatement(),
 		}
