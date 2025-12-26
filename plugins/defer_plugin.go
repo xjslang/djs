@@ -118,30 +118,17 @@ func DeferPlugin(pb *parser.Builder) {
 	})
 
 	pb.UseExpressionInterceptor(func(p *parser.Parser, next func() ast.Expression) ast.Expression {
-		if p.CurrentToken.Type != token.FUNCTION {
+		asyncFn := p.CurrentToken.Type == asyncToken
+		if p.CurrentToken.Type != token.FUNCTION && !asyncFn {
 			return next()
 		}
-
+		if asyncFn {
+			p.NextToken() // consume 'async'
+		}
 		expr := p.ParseFunctionExpression()
 		if fe, ok := expr.(*ast.FunctionExpression); ok {
 			return &DeferFunctionExpression{
-				prefix:             id.String(),
-				FunctionExpression: fe,
-			}
-		}
-		return expr
-	})
-
-	pb.UseExpressionInterceptor(func(p *parser.Parser, next func() ast.Expression) ast.Expression {
-		if p.CurrentToken.Type != asyncToken {
-			return next()
-		}
-
-		p.NextToken() // consume 'async'
-		expr := p.ParseFunctionExpression()
-		if fe, ok := expr.(*ast.FunctionExpression); ok {
-			return &DeferFunctionExpression{
-				async:              true,
+				async:              asyncFn,
 				prefix:             id.String(),
 				FunctionExpression: fe,
 			}
