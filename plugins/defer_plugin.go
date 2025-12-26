@@ -49,12 +49,12 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 
 type DeferFunctionDeclaration struct {
 	*ast.FunctionDeclaration
-	prefix string
-	async  bool
+	prefix  string
+	asyncFn bool
 }
 
 func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
-	if fd.async {
+	if fd.asyncFn {
 		cw.WriteString("async ")
 	}
 	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.prefix)
@@ -62,12 +62,12 @@ func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
 
 type DeferFunctionExpression struct {
 	*ast.FunctionExpression
-	prefix string
-	async  bool
+	prefix  string
+	asyncFn bool
 }
 
 func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
-	if fe.async {
+	if fe.asyncFn {
 		cw.WriteString("async ")
 	}
 	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.prefix)
@@ -132,7 +132,7 @@ func DeferPlugin(pb *parser.Builder) {
 			p.NextToken() // consume 'async'
 		}
 		return &DeferFunctionDeclaration{
-			async:               asyncFn,
+			asyncFn:             asyncFn,
 			prefix:              id.String(),
 			FunctionDeclaration: p.ParseFunctionStatement(),
 		}
@@ -149,7 +149,7 @@ func DeferPlugin(pb *parser.Builder) {
 		expr := p.ParseFunctionExpression()
 		if fe, ok := expr.(*ast.FunctionExpression); ok {
 			return &DeferFunctionExpression{
-				async:              asyncFn,
+				asyncFn:            asyncFn,
 				prefix:             id.String(),
 				FunctionExpression: fe,
 			}
