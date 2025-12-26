@@ -3,9 +3,17 @@ let fs = require('fs')
 
 // Global resources
 let logFile = fs.openSync('request.log', 'w')
-let agent = new http.Agent({ keepAlive: true, maxSockets: 10 })
 
 async function fetchUserData() {
+  let agent = new http.Agent({ keepAlive: true, maxSockets: 10 })
+  defer {
+    console.log('\nCleaning up resources...')
+    agent.destroy()
+    console.log('✓ HTTP agent destroyed')
+    fs.closeSync(logFile)
+    console.log('✓ Log file closed\n')
+  }
+
   fs.writeSync(logFile, `[${new Date().toISOString()}] Starting HTTP requests\n`)
   console.log('Starting HTTP cleanup example...')
   console.log('Fetching data from local server (http://localhost:3000)\n')
@@ -14,7 +22,6 @@ async function fetchUserData() {
   let userResponse = await makeRequest('http://localhost:3000/api/users/123', agent, logFile) or |err| {
     console.error('Failed to fetch user data:', err.message)
     console.error('Make sure to run: npm run server')
-    cleanup()
     return
   }
 
@@ -24,7 +31,6 @@ async function fetchUserData() {
   // Fetch user's posts with await and or
   let postsResponse = await makeRequest(`http://localhost:3000/api/users/${userData.id}/posts`, agent, logFile) or |err| {
     console.error('Failed to fetch posts:', err.message)
-    cleanup()
     return
   }
 
@@ -37,16 +43,6 @@ async function fetchUserData() {
   })
 
   console.log('\n✓ All requests completed successfully!')
-  cleanup()
-}
-
-// Cleanup function - demonstrates manual cleanup (defer in async functions has a bug)
-function cleanup() {
-  console.log('\nCleaning up resources...')
-  agent.destroy()
-  console.log('✓ HTTP agent destroyed')
-  fs.closeSync(logFile)
-  console.log('✓ Log file closed\n')
 }
 
 // Helper function to make HTTP requests (returns Promise)
@@ -99,6 +95,6 @@ function makeRequest(url, agent, logFile) {
 
 // Run the async example
 (async function() {
-  await fetchUserData()
+  fetchUserData()
   console.log('Note: Check request.log for the full request log')
 })()
