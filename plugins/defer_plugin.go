@@ -50,9 +50,13 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 type DeferFunctionDeclaration struct {
 	*ast.FunctionDeclaration
 	prefix string
+	async  bool
 }
 
 func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
+	if fd.async {
+		cw.WriteString("async ")
+	}
 	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.prefix)
 }
 
@@ -80,14 +84,23 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 func DeferPlugin(pb *parser.Builder) {
 	id := xid.New()
 	lb := pb.LexerBuilder
-	deferTokenType := lb.RegisterTokenType("DeferStatement")
+	deferToken := lb.RegisterTokenType("DEFER")
+	asyncToken := lb.RegisterTokenType("ASYNC")
+
 	lb.UseTokenInterceptor(func(l *lexer.Lexer, next func() token.Token) token.Token {
 		ret := next()
-		if ret.Type == token.IDENT && ret.Literal == "defer" {
-			ret.Type = deferTokenType
+		if ret.Type != token.IDENT {
+			return ret
+		}
+		switch ret.Literal {
+		case "defer":
+			ret.Type = deferToken
+		case "async":
+			ret.Type = asyncToken
 		}
 		return ret
 	})
+
 	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
 		if p.CurrentToken.Type != token.FUNCTION {
 			return next()
@@ -98,6 +111,20 @@ func DeferPlugin(pb *parser.Builder) {
 			FunctionDeclaration: p.ParseFunctionStatement(),
 		}
 	})
+
+	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
+		if p.CurrentToken.Type != asyncToken {
+			return next()
+		}
+
+		p.NextToken() // consume 'async'
+		return &DeferFunctionDeclaration{
+			async:               true,
+			prefix:              id.String(),
+			FunctionDeclaration: p.ParseFunctionStatement(),
+		}
+	})
+
 	pb.UseExpressionInterceptor(func(p *parser.Parser, next func() ast.Expression) ast.Expression {
 		if p.CurrentToken.Type != token.FUNCTION {
 			return next()
@@ -112,8 +139,9 @@ func DeferPlugin(pb *parser.Builder) {
 		}
 		return expr
 	})
+
 	pb.UseStatementInterceptor(func(p *parser.Parser, next func() ast.Statement) ast.Statement {
-		if p.CurrentToken.Type != deferTokenType {
+		if p.CurrentToken.Type != deferToken {
 			return next()
 		}
 
