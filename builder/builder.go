@@ -13,6 +13,5 @@ func New(lb *lexer.Builder) *parser.Builder {
 		Install(plugins.OrPlugin).
 		Install(plugins.StrictEqualityPlugin).
 		Install(plugins.NewPlugin).
-		Install(plugins.ThrowPlugin).
-		Install(plugins.AsyncPlugin)
+		Install(plugins.ThrowPlugin)
 }
