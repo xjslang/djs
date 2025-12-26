@@ -67,6 +67,9 @@ type DeferFunctionExpression struct {
 }
 
 func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
+	if fe.async {
+		cw.WriteString("async ")
+	}
 	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.prefix)
 }
 
