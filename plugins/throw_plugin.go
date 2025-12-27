@@ -15,9 +15,7 @@ type ThrowStatement struct {
 
 func (ts *ThrowStatement) WriteTo(cw *ast.CodeWriter) {
 	cw.WriteString("throw ")
-	if ts.Argument != nil {
-		ts.Argument.WriteTo(cw)
-	}
+	ts.Argument.WriteTo(cw)
 	cw.WriteRune(';')
 }
 
@@ -41,6 +39,13 @@ func ThrowPlugin(pb *parser.Builder) {
 			return next()
 		}
 		stmt := &ThrowStatement{Token: p.CurrentToken}
+
+		// throw always requires an argument
+		if p.PeekToken.Type == token.SEMICOLON || p.PeekToken.Type == token.EOF || p.PeekToken.Type == token.RBRACE {
+			p.AddError("throw statement requires an argument")
+			return nil
+		}
+
 		p.NextToken() // move to the expression
 		stmt.Argument = p.ParseExpression()
 		p.ExpectSemicolonASI()
