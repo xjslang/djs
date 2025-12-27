@@ -9,22 +9,13 @@ import (
 
 // NewExpression represents a new expression (e.g., new Constructor(args))
 type NewExpression struct {
-	Token       token.Token      // The 'new' token
-	Constructor ast.Expression   // The constructor function
-	Arguments   []ast.Expression // Optional arguments
+	Token token.Token    // The 'new' token
+	Right ast.Expression // The constructor expression (may include arguments)
 }
 
 func (ne *NewExpression) WriteTo(cw *ast.CodeWriter) {
 	cw.WriteString("new ")
-	ne.Constructor.WriteTo(cw)
-	cw.WriteRune('(')
-	for i, arg := range ne.Arguments {
-		if i > 0 {
-			cw.WriteRune(',')
-		}
-		arg.WriteTo(cw)
-	}
-	cw.WriteRune(')')
+	ne.Right.WriteTo(cw)
 }
 
 // NewPlugin adds support for the 'new' operator to create instances
@@ -45,22 +36,9 @@ func NewPlugin(pb *parser.Builder) {
 
 	// Register 'new' as a prefix operator
 	_ = pb.RegisterPrefixOperator(newTokenType, func(tok token.Token, right func() ast.Expression) ast.Expression {
-		expr := &NewExpression{
-			Token:     tok,
-			Arguments: []ast.Expression{},
+		return &NewExpression{
+			Token: tok,
+			Right: right(),
 		}
-
-		// Parse the constructor expression
-		constructor := right()
-		expr.Constructor = constructor
-
-		// Check if there's a call expression (arguments)
-		// If the constructor is already a CallExpression, extract its parts
-		if callExpr, ok := constructor.(*ast.CallExpression); ok {
-			expr.Constructor = callExpr.Function
-			expr.Arguments = callExpr.Arguments
-		}
-
-		return expr
 	})
 }
