@@ -184,10 +184,15 @@ func DeferPlugin(pb *parser.Builder) {
 		if p.PeekToken.Type == token.LBRACE {
 			p.NextToken() // consume {
 			stmt.Body = p.ParseBlockStatement()
+			// Block statements don't need semicolons
 		} else {
 			p.NextToken() // move to statement
 			stmt.Body = &ast.BlockStatement{}
 			stmt.Body.Statements = []ast.Statement{p.ParseStatement()}
+			// Single-line defer needs semicolon (explicit or ASI)
+			if !p.ExpectSemicolonASI() {
+				return nil
+			}
 		}
 		return stmt
 	})
