@@ -1,4 +1,4 @@
 async function defineOnly() {
-  return await 123
+  return await Promise.resolve(123)
 }
 console.log("READY")

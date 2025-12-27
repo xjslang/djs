@@ -1,6 +1,6 @@
 async function main() {
   console.log("before")
-  await 1
+  await Promise.resolve(true)
   console.log("after")
 }
 main()
