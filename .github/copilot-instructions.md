@@ -63,6 +63,7 @@ DJS intentionally omits several modern JavaScript features. These are **design d
 - **No `try/catch`**: Use the `or` construct for error handling
 - **No `try/finally`**: Use the `defer` construct instead
 - **No template literals in some contexts**: May need string concatenation
+- **No ternary operator**: Use the `if` construct
 
 ### Writing DJS-Compatible Code
 
