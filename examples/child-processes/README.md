@@ -5,6 +5,9 @@ This example demonstrates how DJS's `defer` statement simplifies management of c
 ## Running the Example
 
 ```bash
+# install djs
+go install github.com/xjslang/djs@latest
+
 # Run the transpiled JavaScript directly
 npm start
 
