@@ -18,7 +18,7 @@ type LetStatement struct {
 }
 
 type OrExpression struct {
-	Exprression   ast.Expression
+	Expression    ast.Expression
 	ErrorParam    *ast.Identifier // optional error parameter (e.g., |err|)
 	FallbackBlock *ast.BlockStatement
 }
@@ -27,7 +27,7 @@ type OrExpression struct {
 func (es *ExpressionStatement) WriteTo(cw *ast.CodeWriter) {
 	if stmt, ok := es.Expression.(*OrExpression); ok {
 		cw.WriteString("try{")
-		stmt.Exprression.WriteTo(cw)
+		stmt.Expression.WriteTo(cw)
 		cw.WriteString("}catch")
 		if stmt.ErrorParam != nil {
 			cw.WriteRune('(')
@@ -62,7 +62,7 @@ func (ls *LetStatement) WriteTo(cw *ast.CodeWriter) {
 }
 
 func (oe *OrExpression) WriteTo(cw *ast.CodeWriter) {
-	oe.Exprression.WriteTo(cw)
+	oe.Expression.WriteTo(cw)
 }
 
 func OrPlugin(pb *parser.Builder) {
@@ -127,7 +127,7 @@ func OrPlugin(pb *parser.Builder) {
 			p.NextToken() // consume {
 			fallbackBlock := p.ParseBlockStatement()
 			return &OrExpression{
-				Exprression:   exp,
+				Expression:    exp,
 				ErrorParam:    errorParam,
 				FallbackBlock: fallbackBlock,
 			}
