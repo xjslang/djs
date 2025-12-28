@@ -14,6 +14,7 @@ import (
 	"github.com/rs/xid"
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
+	"github.com/xjslang/xjs/parser"
 	"github.com/xjslang/xjs/sourcemap"
 
 	djsbuilder "github.com/xjslang/djs/builder"
@@ -30,12 +31,14 @@ func run() int {
 	var inlineSources bool
 	var mapRoot string
 	var sourceRoot string
+	var jsonOutput bool
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
 	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
 	flag.BoolVar(&inlineSources, "inline-sources", false, "Include source content in source map")
 	flag.StringVar(&mapRoot, "map-root", "", "Root path for source map file location")
 	flag.StringVar(&sourceRoot, "source-root", "", "Root path for source files (sourceRoot field in map)")
+	flag.BoolVar(&jsonOutput, "json", false, "Output errors in JSON format")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
@@ -43,6 +46,7 @@ func run() int {
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
 		fmt.Fprintln(os.Stderr, "  djs input.djs                                              # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  djs --json input.djs                                       # Show errors in JSON format")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js input.djs                                 # Transpile to file")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap input.djs                     # External source map")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js --inline-sourcemap input.djs              # Embedded source map")
@@ -118,7 +122,22 @@ func run() int {
 
 	program, perr := p.ParseProgram()
 	if perr != nil {
-		fmt.Fprintln(os.Stderr, perr)
+		if jsonOutput {
+			// Output errors in JSON format using parser.ParserErrors
+			parserErrs := parser.ParserErrors{
+				Errors: p.Errors(),
+				Source: absInputPath,
+			}
+
+			jsonBytes, jerr := json.MarshalIndent(parserErrs, "", "  ")
+			if jerr != nil {
+				fmt.Fprintf(os.Stderr, "Error serializing error response: %v\n", jerr)
+				return 1
+			}
+			fmt.Fprintln(os.Stdout, string(jsonBytes))
+		} else {
+			fmt.Fprintln(os.Stderr, perr)
+		}
 		return 1
 	}
 
