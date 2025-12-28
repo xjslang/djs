@@ -283,9 +283,28 @@ func run() int {
 
 func ensureNodeAvailable() error {
 	cmd := exec.Command("node", "--version")
-	cmd.Stdout = nil
-	cmd.Stderr = nil
-	return cmd.Run()
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("node command not found or failed to execute")
+	}
+
+	version := strings.TrimSpace(string(output))
+	// Remove 'v' prefix if present (e.g., "v18.16.0" -> "18.16.0")
+	version = strings.TrimPrefix(version, "v")
+
+	// Parse version (format: major.minor.patch)
+	var major, minor int
+	_, err = fmt.Sscanf(version, "%d.%d", &major, &minor)
+	if err != nil {
+		return fmt.Errorf("unable to parse node version: %s", version)
+	}
+
+	// DJS requires Node.js 7.6+ for async/await support
+	if major < 7 || (major == 7 && minor < 6) {
+		return fmt.Errorf("node version %s is too old; DJS requires Node.js 7.6 or later for async/await support", version)
+	}
+
+	return nil
 }
 
 func deriveOutputFilename(inputPath string) string {
