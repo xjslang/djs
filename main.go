@@ -32,6 +32,7 @@ func run() int {
 	var mapRoot string
 	var sourceRoot string
 	var jsonOutput bool
+	var checkOnly bool
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
 	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
@@ -39,6 +40,7 @@ func run() int {
 	flag.StringVar(&mapRoot, "map-root", "", "Root path for source map file location")
 	flag.StringVar(&sourceRoot, "source-root", "", "Root path for source files (sourceRoot field in map)")
 	flag.BoolVar(&jsonOutput, "json", false, "Output errors in JSON format")
+	flag.BoolVar(&checkOnly, "check", false, "Check syntax only, do not execute or transpile")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
@@ -46,6 +48,8 @@ func run() int {
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
 		fmt.Fprintln(os.Stderr, "  djs input.djs                                              # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  djs --check input.djs                                      # Check syntax only")
+		fmt.Fprintln(os.Stderr, "  djs --check --json input.djs                               # Check syntax, output JSON")
 		fmt.Fprintln(os.Stderr, "  djs --json input.djs                                       # Show errors in JSON format")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js input.djs                                 # Transpile to file")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap input.djs                     # External source map")
@@ -64,6 +68,16 @@ func run() int {
 	// Validate mutually exclusive flags
 	if generateSourceMap && inlineSourceMap {
 		fmt.Fprintln(os.Stderr, "Error: --sourcemap and --inline-sourcemap are mutually exclusive")
+		return 2
+	}
+
+	// Validate --check is incompatible with -o and source map flags
+	if checkOnly && outputPath != "" {
+		fmt.Fprintln(os.Stderr, "Error: --check cannot be used with -o (transpile mode)")
+		return 2
+	}
+	if checkOnly && (generateSourceMap || inlineSourceMap || inlineSources || mapRoot != "" || sourceRoot != "") {
+		fmt.Fprintln(os.Stderr, "Error: --check cannot be used with source map flags")
 		return 2
 	}
 
@@ -110,7 +124,7 @@ func run() int {
 	}
 
 	// Only check for Node if we're going to execute
-	if !transpileOnly {
+	if !transpileOnly && !checkOnly {
 		if err := ensureNodeAvailable(); err != nil {
 			fmt.Fprintf(os.Stderr, "Node.js not found: %v\n", err)
 			return 1
@@ -139,6 +153,11 @@ func run() int {
 			fmt.Fprintln(os.Stderr, perr)
 		}
 		return 1
+	}
+
+	// Check-only mode: if no errors, exit successfully
+	if checkOnly {
+		return 0
 	}
 
 	// Generate source map when executing OR when explicitly requested
