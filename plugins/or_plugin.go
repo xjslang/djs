@@ -18,6 +18,7 @@ type LetStatement struct {
 }
 
 type OrExpression struct {
+	Token         token.Token // the 'or' token
 	Expression    ast.Expression
 	ErrorParam    *ast.Identifier // optional error parameter (e.g., |err|)
 	FallbackBlock *ast.BlockStatement
@@ -71,9 +72,9 @@ func OrPlugin(pb *parser.Builder) {
 	pipeTokenType := lb.RegisterTokenType("|")
 	lb.UseTokenInterceptor(func(l *lexer.Lexer, next func() token.Token) token.Token {
 		ret := next()
-		if ret.Literal == "or" {
+		if ret.Type == token.IDENT && ret.Literal == "or" {
 			ret.Type = orTokenType
-		} else if ret.Literal == "|" {
+		} else if ret.Type == token.ILLEGAL && ret.Literal == "|" {
 			ret.Type = pipeTokenType
 		}
 		return ret
@@ -98,6 +99,7 @@ func OrPlugin(pb *parser.Builder) {
 		exp := next()
 		if p.PeekToken.Type == orTokenType {
 			p.NextToken() // consume 'or'
+			tok := p.CurrentToken
 
 			var errorParam *ast.Identifier
 
@@ -127,6 +129,7 @@ func OrPlugin(pb *parser.Builder) {
 			p.NextToken() // consume {
 			fallbackBlock := p.ParseBlockStatement()
 			return &OrExpression{
+				Token:         tok,
 				Expression:    exp,
 				ErrorParam:    errorParam,
 				FallbackBlock: fallbackBlock,

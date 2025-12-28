@@ -88,6 +88,7 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 }
 
 type AwaitExpression struct {
+	Token token.Token // the 'await' token
 	Right *ast.CallExpression
 }
 
@@ -124,6 +125,7 @@ func DeferPlugin(pb *parser.Builder) {
 			return next()
 		}
 
+		tok := p.CurrentToken
 		p.NextToken() // consume 'await'
 		exp := next()
 		fe, ok := exp.(*ast.CallExpression)
@@ -132,6 +134,7 @@ func DeferPlugin(pb *parser.Builder) {
 			return nil
 		}
 		return &AwaitExpression{
+			Token: tok,
 			Right: fe,
 		}
 	})
