@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +22,10 @@ import (
 	djsbuilder "github.com/xjslang/djs/builder"
 )
 
+type ParserErrors struct {
+	Errors []parser.ParserError `json:"errors"`
+}
+
 func main() {
 	os.Exit(run())
 }
@@ -33,6 +39,8 @@ func run() int {
 	var sourceRoot string
 	var jsonOutput bool
 	var checkOnly bool
+	var useStdin bool
+	var stdinFilename string
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
 	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
@@ -41,28 +49,39 @@ func run() int {
 	flag.StringVar(&sourceRoot, "source-root", "", "Root path for source files (sourceRoot field in map)")
 	flag.BoolVar(&jsonOutput, "json", false, "Output errors in JSON format")
 	flag.BoolVar(&checkOnly, "check", false, "Check syntax only, do not execute or transpile")
+	flag.BoolVar(&useStdin, "stdin", false, "Read source code from stdin instead of file")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
-		fmt.Fprintln(os.Stderr, "  djs input.djs                                              # Transpile and execute")
-		fmt.Fprintln(os.Stderr, "  djs --check input.djs                                      # Check syntax only")
-		fmt.Fprintln(os.Stderr, "  djs --check --json input.djs                               # Check syntax, output JSON")
-		fmt.Fprintln(os.Stderr, "  djs --json input.djs                                       # Show errors in JSON format")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js input.djs                                 # Transpile to file")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap input.djs                     # External source map")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js --inline-sourcemap input.djs              # Embedded source map")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --inline-sources input.djs    # With embedded sources")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --map-root /maps/ input.djs   # Map in /maps/ folder")
-		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --source-root /src/ input.djs # Source root prefix")
+		fmt.Fprintln(os.Stderr, "  djs input.djs                                                   # Transpile and execute")
+		fmt.Fprintln(os.Stderr, "  djs --check input.djs                                           # Check syntax only")
+		fmt.Fprintln(os.Stderr, "  djs --check --json input.djs                                    # Check syntax, output JSON")
+		fmt.Fprintln(os.Stderr, "  cat input.djs | djs --stdin --check --json                      # Check from stdin")
+		fmt.Fprintln(os.Stderr, "  djs --json input.djs                                            # Show errors in JSON format")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js input.djs                                      # Transpile to file")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap input.djs                          # External source map")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js --inline-sourcemap input.djs                   # Embedded source map")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --inline-sources input.djs         # With embedded sources")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --map-root /maps/ input.djs        # Map in /maps/ folder")
+		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --source-root /src/ input.djs      # Source root prefix")
 	}
 
 	flag.Parse()
-	if flag.NArg() != 1 {
-		flag.Usage()
-		return 2
+
+	// Validate stdin usage
+	if useStdin {
+		if flag.NArg() != 0 {
+			fmt.Fprintln(os.Stderr, "Error: --stdin cannot be used with a file argument")
+			return 2
+		}
+	} else {
+		if flag.NArg() != 1 {
+			flag.Usage()
+			return 2
+		}
 	}
 
 	// Validate mutually exclusive flags
@@ -109,18 +128,36 @@ func run() int {
 		return 2
 	}
 
-	inputPath := flag.Arg(0)
-	inputCode, err := os.ReadFile(inputPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
-		return 1
-	}
+	var inputCode []byte
+	var absInputPath string
+	var err error
 
-	// Convert to absolute path for accurate source maps
-	absInputPath, err := filepath.Abs(inputPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error resolving file path: %v\n", err)
-		return 1
+	if useStdin {
+		// Read from stdin
+		reader := bufio.NewReader(os.Stdin)
+		var builder strings.Builder
+		_, err = io.Copy(&builder, reader)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading from stdin: %v\n", err)
+			return 1
+		}
+		inputCode = []byte(builder.String())
+		absInputPath = stdinFilename
+	} else {
+		// Read from file
+		inputPath := flag.Arg(0)
+		inputCode, err = os.ReadFile(inputPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
+			return 1
+		}
+
+		// Convert to absolute path for accurate source maps
+		absInputPath, err = filepath.Abs(inputPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error resolving file path: %v\n", err)
+			return 1
+		}
 	}
 
 	// Only check for Node if we're going to execute
@@ -138,9 +175,8 @@ func run() int {
 	if perr != nil {
 		if jsonOutput {
 			// Output errors in JSON format using parser.ParserErrors
-			parserErrs := parser.ParserErrors{
+			parserErrs := ParserErrors{
 				Errors: p.Errors(),
-				Source: absInputPath,
 			}
 
 			jsonBytes, jerr := json.MarshalIndent(parserErrs, "", "  ")
@@ -264,7 +300,7 @@ func run() int {
 	sm.SourcesContent = []string{string(inputCode)}
 
 	// Determine output file name (for tooling); not strictly needed for inline maps
-	outFile := deriveOutputFilename(inputPath)
+	outFile := deriveOutputFilename(absInputPath)
 	sm.File = filepath.Base(outFile)
 
 	// Serialize SourceMap to base64 JSON and embed as inline comment
