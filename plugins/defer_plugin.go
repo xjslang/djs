@@ -93,7 +93,7 @@ type AwaitExpression struct {
 }
 
 func (ae *AwaitExpression) WriteTo(cw *ast.CodeWriter) {
-	cw.AddMapping(ae.Token.Start.Line, ae.Token.Start.Column)
+	cw.AddMapping(ae.Token.Start)
 	cw.WriteString("await ")
 	ae.Right.WriteTo(cw)
 }
