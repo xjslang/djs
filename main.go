@@ -39,8 +39,6 @@ func run() int {
 	var sourceRoot string
 	var jsonOutput bool
 	var checkOnly bool
-	var useStdin bool
-	var stdinFilename string
 	flag.StringVar(&outputPath, "o", "", "Output file path (transpile only, do not execute)")
 	flag.BoolVar(&generateSourceMap, "sourcemap", false, "Generate external source map file (.map)")
 	flag.BoolVar(&inlineSourceMap, "inline-sourcemap", false, "Embed source map as base64 in output file")
@@ -49,17 +47,17 @@ func run() int {
 	flag.StringVar(&sourceRoot, "source-root", "", "Root path for source files (sourceRoot field in map)")
 	flag.BoolVar(&jsonOutput, "json", false, "Output errors in JSON format")
 	flag.BoolVar(&checkOnly, "check", false, "Check syntax only, do not execute or transpile")
-	flag.BoolVar(&useStdin, "stdin", false, "Read source code from stdin instead of file")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [options] <file.djs>\n", filepath.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] [file.djs]\n", filepath.Base(os.Args[0]))
+		fmt.Fprintln(os.Stderr, "\nIf no file is provided, reads from stdin.")
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr, "\nExamples:")
 		fmt.Fprintln(os.Stderr, "  djs input.djs                                                   # Transpile and execute")
 		fmt.Fprintln(os.Stderr, "  djs --check input.djs                                           # Check syntax only")
 		fmt.Fprintln(os.Stderr, "  djs --check --json input.djs                                    # Check syntax, output JSON")
-		fmt.Fprintln(os.Stderr, "  cat input.djs | djs --stdin --check --json                      # Check from stdin")
+		fmt.Fprintln(os.Stderr, "  cat input.djs | djs --check --json                              # Check from stdin")
 		fmt.Fprintln(os.Stderr, "  djs --json input.djs                                            # Show errors in JSON format")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js input.djs                                      # Transpile to file")
 		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap input.djs                          # External source map")
@@ -71,17 +69,11 @@ func run() int {
 
 	flag.Parse()
 
-	// Validate stdin usage
-	if useStdin {
-		if flag.NArg() != 0 {
-			fmt.Fprintln(os.Stderr, "Error: --stdin cannot be used with a file argument")
-			return 2
-		}
-	} else {
-		if flag.NArg() != 1 {
-			flag.Usage()
-			return 2
-		}
+	// Accept 0 arguments (stdin) or 1 argument (file)
+	if flag.NArg() > 1 {
+		fmt.Fprintln(os.Stderr, "Error: too many arguments")
+		flag.Usage()
+		return 2
 	}
 
 	// Validate mutually exclusive flags
@@ -132,6 +124,9 @@ func run() int {
 	var absInputPath string
 	var err error
 
+	// Determine if reading from stdin or file
+	useStdin := flag.NArg() == 0
+
 	if useStdin {
 		// Read from stdin
 		reader := bufio.NewReader(os.Stdin)
@@ -142,7 +137,7 @@ func run() int {
 			return 1
 		}
 		inputCode = []byte(builder.String())
-		absInputPath = stdinFilename
+		absInputPath = "<stdin>"
 	} else {
 		// Read from file
 		inputPath := flag.Arg(0)
