@@ -14,7 +14,7 @@ type NewExpression struct {
 }
 
 func (ne *NewExpression) WriteTo(cw *ast.CodeWriter) {
-	cw.AddMapping(ne.Token.Line, ne.Token.Column)
+	cw.AddMapping(ne.Token.Start.Line, ne.Token.Start.Column)
 	cw.WriteString("new ")
 	ne.Right.WriteTo(cw)
 }

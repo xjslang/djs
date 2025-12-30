@@ -14,7 +14,7 @@ type ThrowStatement struct {
 }
 
 func (ts *ThrowStatement) WriteTo(cw *ast.CodeWriter) {
-	cw.AddMapping(ts.Token.Line, ts.Token.Column)
+	cw.AddMapping(ts.Token.Start.Line, ts.Token.Start.Column)
 	cw.WriteString("throw ")
 	ts.Argument.WriteTo(cw)
 	cw.WriteRune(';')
