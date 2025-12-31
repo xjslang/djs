@@ -107,7 +107,7 @@ func OrPlugin(pb *parser.Builder) {
 			if p.PeekToken.Type == pipeTokenType {
 				p.NextToken() // consume '|'
 				if p.PeekToken.Type != token.IDENT {
-					p.AddErrorAtToken(fmt.Sprintf("expected identifier after |, got %v", p.PeekToken), p.PeekToken)
+					p.AddErrorAtToken("expected identifier after |", p.PeekToken)
 					return exp
 				}
 				p.NextToken() // consume identifier
@@ -116,7 +116,7 @@ func OrPlugin(pb *parser.Builder) {
 					Value: p.CurrentToken.Literal,
 				}
 				if p.PeekToken.Type != pipeTokenType {
-					p.AddErrorAtToken(fmt.Sprintf("expected | after identifier, got %v", p.PeekToken), p.PeekToken)
+					p.AddErrorAtToken("expected | after identifier", p.PeekToken)
 					return exp
 				}
 				p.NextToken() // consume closing '|'
