@@ -17,44 +17,44 @@ func TestNewExpression(t *testing.T) {
 		{
 			name:     "new without parentheses",
 			input:    `let d = new Date`,
-			expected: `let d=new Date`,
+			expected: `let d=new Date;`,
 		},
 		{
 			name:     "new with empty parentheses",
 			input:    `let d = new Date()`,
-			expected: `let d=new Date()`,
+			expected: `let d=new Date();`,
 		},
 		{
 			name:     "new with single argument",
 			input:    `let e = new Error("message")`,
-			expected: `let e=new Error("message")`,
+			expected: `let e=new Error("message");`,
 		},
 		{
 			name:     "new with multiple arguments",
 			input:    `let p = new Point(10, 20)`,
-			expected: `let p=new Point(10,20)`,
+			expected: `let p=new Point(10,20);`,
 		},
 		{
 			name:     "new with expression argument",
 			input:    `let e = new Error("Error: " + msg)`,
-			expected: `let e=new Error(("Error: "+msg))`,
+			expected: `let e=new Error(("Error: "+msg));`,
 		},
 		{
 			name: "new in function",
 			input: `function createError() {
 				return new Error("failed")
 			}`,
-			expected: `function createError(){return new Error("failed")}`,
+			expected: `function createError(){return new Error("failed");}`,
 		},
 		{
 			name:     "new with member expression",
 			input:    `let c = new MyModule.MyClass()`,
-			expected: `let c=new MyModule.MyClass()`,
+			expected: `let c=new MyModule.MyClass();`,
 		},
 		{
 			name:     "nested new expressions",
 			input:    `let x = new Wrapper(new Inner())`,
-			expected: `let x=new Wrapper(new Inner())`,
+			expected: `let x=new Wrapper(new Inner());`,
 		},
 	}
 

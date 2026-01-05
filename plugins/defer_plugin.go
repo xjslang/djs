@@ -84,7 +84,7 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 	deferName := "defers_" + ds.prefix
 	cw.WriteString(deferName + ".push(() =>")
 	ds.Body.WriteTo(cw)
-	cw.WriteRune(')')
+	cw.WriteString(");")
 }
 
 type AwaitExpression struct {

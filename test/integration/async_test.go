@@ -34,7 +34,7 @@ func TestAsyncFunctionDeclaration(t *testing.T) {
 		t.Fatalf("Parser error: %v", err)
 	}
 	result := compiler.New().Compile(program)
-	if result.Code != "async function read(){let u=await get()}" {
+	if result.Code != "async function read(){let u=await get();}" {
 		t.Errorf("Unexpected transpiled output: %q", result.Code)
 	}
 }
@@ -48,7 +48,7 @@ func TestAsyncFunctionExpression(t *testing.T) {
 		t.Fatalf("Parser error: %v", err)
 	}
 	result := compiler.New().Compile(program)
-	if result.Code != "let f=async function(){await go()}" {
+	if result.Code != "let f=async function(){await go();};" {
 		t.Errorf("Unexpected transpiled output: %q", result.Code)
 	}
 }

@@ -20,7 +20,7 @@ func TestOrExpressionWithLet(t *testing.T) {
 				console.error('Unable to open database: ', err)
 				return
 			}`,
-			expected: `let db;try{db=openDatabase("mydata.db")}catch(err){console.error("Unable to open database: ",err);return}`,
+			expected: `let db;try{db=openDatabase("mydata.db")}catch(err){console.error("Unable to open database: ",err);return;}`,
 		},
 		{
 			name: "let with or without error parameter",
@@ -28,20 +28,20 @@ func TestOrExpressionWithLet(t *testing.T) {
 				console.log('Operation failed')
 				return
 			}`,
-			expected: `let result;try{result=riskyOperation()}catch{console.log("Operation failed");return}`,
+			expected: `let result;try{result=riskyOperation()}catch{console.log("Operation failed");return;}`,
 		},
 		{
 			name: "let with or and simple fallback",
 			input: `let x = getValue() or |e| {
 				return
 			}`,
-			expected: `let x;try{x=getValue()}catch(e){return}`,
+			expected: `let x;try{x=getValue()}catch(e){return;}`,
 		},
 		{
 			name: "multiple statements with or",
 			input: `let a = getA() or |err| { return }
 			let b = getB() or { return }`,
-			expected: `let a;try{a=getA()}catch(err){return};let b;try{b=getB()}catch{return}`,
+			expected: `let a;try{a=getA()}catch(err){return;}let b;try{b=getB()}catch{return;}`,
 		},
 	}
 
@@ -78,14 +78,14 @@ func TestOrExpressionStatement(t *testing.T) {
 			input: `doSomething() or |err| {
 				console.log('Failed:', err)
 			}`,
-			expected: `try{doSomething()}catch(err){console.log("Failed:",err)}`,
+			expected: `try{doSomething()}catch(err){console.log("Failed:",err);}`,
 		},
 		{
 			name: "expression statement with or without parameter",
 			input: `execute() or {
 				console.log('Error occurred')
 			}`,
-			expected: `try{execute()}catch{console.log("Error occurred")}`,
+			expected: `try{execute()}catch{console.log("Error occurred");}`,
 		},
 	}
 
@@ -119,7 +119,7 @@ func TestOrInFunction(t *testing.T) {
 		}
 		console.log('Connected')
 	}`
-	expected := `function connect(){let db;try{db=openDb("test.db")}catch(err){console.log("Failed to open:",err);return};console.log("Connected")}`
+	expected := `function connect(){let db;try{db=openDb("test.db")}catch(err){console.log("Failed to open:",err);return;}console.log("Connected");}`
 
 	lb := lexer.NewBuilder()
 	p := parser.NewBuilder(lb).
