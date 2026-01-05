@@ -3,6 +3,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/magefile/mage/sh"
 )
 
@@ -24,4 +26,17 @@ func Tidy() error {
 // Lint runs linting
 func Lint() error {
 	return sh.RunV("golangci-lint", "run")
+}
+
+// InstallHooks configures Git hooks for the project
+func InstallHooks() error {
+	fmt.Println("🔗 Installing Git hooks...")
+	if err := sh.RunV("git", "config", "core.hooksPath", ".githooks"); err != nil {
+		return fmt.Errorf("failed to set hooks path: %w", err)
+	}
+	if err := sh.RunV("chmod", "+x", ".githooks/pre-push"); err != nil {
+		return fmt.Errorf("failed to make pre-push executable: %w", err)
+	}
+	fmt.Println("✅ Git hooks installed successfully!")
+	return nil
 }
