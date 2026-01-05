@@ -44,8 +44,7 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
 		)
 	} else {
-		cw.WriteRune(')')
-		cw.WriteSpace()
+		cw.WriteString(") ")
 		body.WriteTo(cw)
 	}
 }
