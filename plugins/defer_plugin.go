@@ -44,7 +44,7 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 			"try{" + deferName + "[" + indexName + "-1]()}catch(" + errorName + "){console.log(" + errorName + ")}}}}",
 		)
 	} else {
-		cw.WriteString(") ")
+		cw.WriteRune(')')
 		body.WriteTo(cw)
 	}
 }
@@ -84,7 +84,7 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 	deferName := "defers_" + ds.prefix
 	cw.WriteString(deferName + ".push(() =>")
 	ds.Body.WriteTo(cw)
-	cw.WriteRune(')')
+	cw.WriteString(");")
 }
 
 type AwaitExpression struct {
