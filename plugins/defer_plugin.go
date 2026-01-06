@@ -98,6 +98,10 @@ func (ae *AwaitExpression) WriteTo(cw *ast.CodeWriter) {
 	ae.Right.WriteTo(cw)
 }
 
+func (ae *AwaitExpression) Precedence() int {
+	return ast.PrecedenceUnary
+}
+
 func DeferPlugin(pb *parser.Builder) {
 	id := xid.New()
 	lb := pb.LexerBuilder

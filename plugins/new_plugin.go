@@ -19,6 +19,10 @@ func (ne *NewExpression) WriteTo(cw *ast.CodeWriter) {
 	ne.Right.WriteTo(cw)
 }
 
+func (ne *NewExpression) Precedence() int {
+	return ast.PrecedenceUnary
+}
+
 // NewPlugin adds support for the 'new' operator to create instances
 func NewPlugin(pb *parser.Builder) {
 	lb := pb.LexerBuilder

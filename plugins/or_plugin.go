@@ -66,6 +66,11 @@ func (oe *OrExpression) WriteTo(cw *ast.CodeWriter) {
 	oe.Expression.WriteTo(cw)
 }
 
+func (oe *OrExpression) Precedence() int {
+	// or has very low precedence, similar to assignment
+	return ast.PrecedenceAssignment
+}
+
 func OrPlugin(pb *parser.Builder) {
 	lb := pb.LexerBuilder
 	orTokenType := lb.RegisterTokenType("or")
