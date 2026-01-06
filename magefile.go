@@ -10,21 +10,25 @@ import (
 
 // Test runs all Go tests in the project using 'go test ./...'
 func Test() error {
+	fmt.Println("🧪 Running tests...")
 	return sh.RunV("go", "test", "./...")
 }
 
 // Bench runs project benchmarks using 'go test -bench=.'
 func Bench() error {
+	fmt.Println("⚡ Running benchmarks...")
 	return sh.RunV("go", "test", "-bench=.")
 }
 
 // Tidy cleans and organizes the go.mod file using 'go mod tidy'
 func Tidy() error {
+	fmt.Println("🔧 Tidying go.mod...")
 	return sh.RunV("go", "mod", "tidy")
 }
 
 // Lint runs linting
 func Lint() error {
+	fmt.Println("🔍 Running linter...")
 	return sh.RunV("golangci-lint", "run")
 }
 
