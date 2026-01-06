@@ -27,7 +27,7 @@ func TestThrowWithArgument(t *testing.T) {
 		{
 			name:     "throw expression",
 			input:    `throw "Error: " + message`,
-			expected: `throw ("Error: "+message);`,
+			expected: `throw "Error: "+message;`,
 		},
 		{
 			name: "throw in function",

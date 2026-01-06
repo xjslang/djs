@@ -37,7 +37,7 @@ func TestNewExpression(t *testing.T) {
 		{
 			name:     "new with expression argument",
 			input:    `let e = new Error("Error: " + msg)`,
-			expected: `let e=new Error(("Error: "+msg));`,
+			expected: `let e=new Error("Error: "+msg);`,
 		},
 		{
 			name: "new in function",
