@@ -64,6 +64,7 @@ func Transform(stmts []ast.Statement) []ast.Statement {
 	result := []ast.Statement{}
 	for _, stmt := range stmts {
 		switch v := stmt.(type) {
+		// defer
 		case *DeferStatement:
 			result = append(result, &DeferStatementFormatter{
 				DeferStatement: v,
@@ -78,6 +79,14 @@ func Transform(stmts []ast.Statement) []ast.Statement {
 			result = append(result, &DeferFunctionExpressionFormatter{
 				DeferFunctionExpression: v,
 			})
+		// or
+		case *ExpressionStatement:
+			if w, ok := v.Expression.(*OrExpression); ok {
+				v.Expression = &OrFormatter{
+					OrExpression: w,
+				}
+			}
+			result = append(result, v)
 		case *LetStatement:
 			switch w := v.Value.(type) {
 			case *DeferFunctionExpression:
