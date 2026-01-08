@@ -60,11 +60,12 @@ func (of *OrFormatter) WriteTo(cw *ast.CodeWriter) {
 	of.FallbackBlock.WriteTo(cw)
 }
 
+// Transform recursively processes a slice of AST statements and replaces specific statement types
+// with their corresponding formatter implementations.
 func Transform(stmts []ast.Statement) []ast.Statement {
 	result := []ast.Statement{}
 	for _, stmt := range stmts {
 		switch v := stmt.(type) {
-		// defer
 		case *DeferStatement:
 			result = append(result, &DeferStatementFormatter{
 				DeferStatement: v,
@@ -79,7 +80,6 @@ func Transform(stmts []ast.Statement) []ast.Statement {
 			result = append(result, &DeferFunctionExpressionFormatter{
 				DeferFunctionExpression: v,
 			})
-		// or
 		case *ExpressionStatement:
 			if w, ok := v.Expression.(*OrExpression); ok {
 				v.Expression = &OrFormatter{
