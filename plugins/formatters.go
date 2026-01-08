@@ -43,3 +43,57 @@ type LetStatementFormatter struct {
 func (lsf *LetStatementFormatter) WriteTo(cw *ast.CodeWriter) {
 	lsf.LetStatement.WriteTo(cw)
 }
+
+func TransformProgram(program *ast.Program) *ast.Program {
+	result := &ast.Program{
+		Statements: []ast.Statement{},
+	}
+	// replace DeferFunctionDeclaration with DeferFunctionFormatter
+	for _, stmt := range program.Statements {
+		switch v := stmt.(type) {
+		case *DeferFunctionDeclaration:
+			// replace DeferStatement with DeferStatementFormatter
+			dfBody := &ast.BlockStatement{
+				Statements: []ast.Statement{},
+			}
+			for _, bodyStmt := range v.Body.Statements {
+				if ds, ok := bodyStmt.(*DeferStatement); ok {
+					bodyStmt = &DeferStatementFormatter{
+						DeferStatement: ds,
+					}
+				}
+				dfBody.Statements = append(dfBody.Statements, bodyStmt)
+			}
+			v.Body = dfBody
+
+			result.Statements = append(result.Statements, &DeferFunctionFormatter{
+				DeferFunctionDeclaration: v,
+			})
+		case *LetStatement:
+			if fe, ok := v.Value.(*DeferFunctionExpression); ok {
+				// replace DeferStatement with DeferStatementFormatter
+				feBody := &ast.BlockStatement{
+					Statements: []ast.Statement{},
+				}
+				for _, bodyStmt := range fe.Body.Statements {
+					if ds, ok := bodyStmt.(*DeferStatement); ok {
+						bodyStmt = &DeferStatementFormatter{
+							DeferStatement: ds,
+						}
+					}
+					feBody.Statements = append(feBody.Statements, bodyStmt)
+				}
+				fe.Body = feBody
+
+				result.Statements = append(result.Statements, &LetStatementFormatter{
+					LetStatement: v,
+				})
+			} else {
+				result.Statements = append(result.Statements, stmt)
+			}
+		default:
+			result.Statements = append(result.Statements, stmt)
+		}
+	}
+	return result
+}
