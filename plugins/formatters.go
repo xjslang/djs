@@ -44,6 +44,22 @@ func (lsf *LetStatementFormatter) WriteTo(cw *ast.CodeWriter) {
 	lsf.LetStatement.WriteTo(cw)
 }
 
+type OrFormatter struct {
+	*OrExpression
+}
+
+func (of *OrFormatter) WriteTo(cw *ast.CodeWriter) {
+	of.Expression.WriteTo(cw)
+	cw.WriteString(" or ")
+	if of.ErrorParam != nil {
+		cw.WriteRune('|')
+		of.ErrorParam.WriteTo(cw)
+		cw.WriteRune('|')
+		cw.WriteSpace()
+	}
+	of.FallbackBlock.WriteTo(cw)
+}
+
 func Transform(stmts []ast.Statement) []ast.Statement {
 	result := []ast.Statement{}
 	for _, stmt := range stmts {
@@ -63,8 +79,13 @@ func Transform(stmts []ast.Statement) []ast.Statement {
 				DeferFunctionExpression: v,
 			})
 		case *LetStatement:
-			if dfe, ok := v.Value.(*DeferFunctionExpression); ok {
-				dfe.Body.Statements = Transform(dfe.Body.Statements)
+			switch w := v.Value.(type) {
+			case *DeferFunctionExpression:
+				w.Body.Statements = Transform(w.Body.Statements)
+			case *OrExpression:
+				v.Value = &OrFormatter{
+					OrExpression: w,
+				}
 			}
 			result = append(result, &LetStatementFormatter{
 				LetStatement: v,
