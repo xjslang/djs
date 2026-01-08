@@ -44,55 +44,33 @@ func (lsf *LetStatementFormatter) WriteTo(cw *ast.CodeWriter) {
 	lsf.LetStatement.WriteTo(cw)
 }
 
-func TransformProgram(program *ast.Program) *ast.Program {
-	result := &ast.Program{
-		Statements: []ast.Statement{},
-	}
-	// replace DeferFunctionDeclaration with DeferFunctionFormatter
-	for _, stmt := range program.Statements {
+func Transform(stmts []ast.Statement) []ast.Statement {
+	result := []ast.Statement{}
+	for _, stmt := range stmts {
 		switch v := stmt.(type) {
+		case *DeferStatement:
+			result = append(result, &DeferStatementFormatter{
+				DeferStatement: v,
+			})
 		case *DeferFunctionDeclaration:
-			// replace DeferStatement with DeferStatementFormatter
-			dfBody := &ast.BlockStatement{
-				Statements: []ast.Statement{},
-			}
-			for _, bodyStmt := range v.Body.Statements {
-				if ds, ok := bodyStmt.(*DeferStatement); ok {
-					bodyStmt = &DeferStatementFormatter{
-						DeferStatement: ds,
-					}
-				}
-				dfBody.Statements = append(dfBody.Statements, bodyStmt)
-			}
-			v.Body = dfBody
-
-			result.Statements = append(result.Statements, &DeferFunctionFormatter{
+			v.Body.Statements = Transform(v.Body.Statements)
+			result = append(result, &DeferFunctionFormatter{
 				DeferFunctionDeclaration: v,
 			})
+		case *DeferFunctionExpression:
+			v.Body.Statements = Transform(v.Body.Statements)
+			result = append(result, &DeferFunctionExpressionFormatter{
+				DeferFunctionExpression: v,
+			})
 		case *LetStatement:
-			if fe, ok := v.Value.(*DeferFunctionExpression); ok {
-				// replace DeferStatement with DeferStatementFormatter
-				feBody := &ast.BlockStatement{
-					Statements: []ast.Statement{},
-				}
-				for _, bodyStmt := range fe.Body.Statements {
-					if ds, ok := bodyStmt.(*DeferStatement); ok {
-						bodyStmt = &DeferStatementFormatter{
-							DeferStatement: ds,
-						}
-					}
-					feBody.Statements = append(feBody.Statements, bodyStmt)
-				}
-				fe.Body = feBody
-
-				result.Statements = append(result.Statements, &LetStatementFormatter{
-					LetStatement: v,
-				})
-			} else {
-				result.Statements = append(result.Statements, stmt)
+			if dfe, ok := v.Value.(*DeferFunctionExpression); ok {
+				dfe.Body.Statements = Transform(dfe.Body.Statements)
 			}
+			result = append(result, &LetStatementFormatter{
+				LetStatement: v,
+			})
 		default:
-			result.Statements = append(result.Statements, stmt)
+			result = append(result, v)
 		}
 	}
 	return result
