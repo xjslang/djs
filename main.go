@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/xjslang/djs/cmd/compile"
+	"github.com/xjslang/djs/cmd/format"
 )
 
 func main() {
@@ -14,28 +17,29 @@ func main() {
 
 	switch args[0] {
 	case "fmt", "format":
-		fmt.Println("format")
-		os.Exit(0)
+		os.Exit(format.Run(args))
 	case "v", "version":
 		os.Exit(printVersion())
 	case "h", "help":
 		os.Exit(printHelp())
 	default:
-		fmt.Println("compile")
-		os.Exit(0)
+		os.Exit(compile.Run(args))
 	}
 }
 
+// TODO: implement version
 func printVersion() int {
 	fmt.Println("version")
 	return 0
 }
 
+// TODO: implement help
 func printHelp() int {
 	fmt.Println("help")
 	return 0
 }
 
+// TODO: implement usage
 func printUsage() int {
 	fmt.Println("usage")
 	return 0
