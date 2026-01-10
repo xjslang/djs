@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/xjslang/djs/cmd/compile"
-	"github.com/xjslang/djs/cmd/format"
+	"github.com/xjslang/djs/cmd"
 )
 
 func main() {
@@ -17,13 +16,13 @@ func main() {
 
 	switch args[0] {
 	case "fmt", "format":
-		os.Exit(format.Run(args))
+		os.Exit(cmd.Format(args))
 	case "v", "version":
 		os.Exit(printVersion())
 	case "h", "help":
 		os.Exit(printHelp())
 	default:
-		os.Exit(compile.Run(args))
+		os.Exit(cmd.Compile(args))
 	}
 }
 

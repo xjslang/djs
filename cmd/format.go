@@ -1,8 +1,8 @@
-package format
+package cmd
 
 import "fmt"
 
-func Run(args []string) int {
+func Format(args []string) int {
 	fmt.Println("format")
 	return 0
 }

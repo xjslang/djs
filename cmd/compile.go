@@ -1,4 +1,4 @@
-package compile
+package cmd
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ type ParserErrors struct {
 }
 
 // TODO: add `-stdin` flag to indicate that the input contents would be provider view stdin
-func Run(args []string) int {
+func Compile(args []string) int {
 	var outputPath string
 	var generateSourceMap bool
 	var inlineSourceMap bool
