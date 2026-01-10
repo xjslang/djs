@@ -25,8 +25,10 @@ DJS is built on top of the [XJS](https://github.com/xjslang/xjs) tool, a JavaScr
 input := `console.log('Hello, world!')`
 program, _ := parser.NewBuilder(lb).
   // plugins are executed in the same order they have been installed (FIFO)
-	Install(plugins.DeferPlugin).
+  // IMPORTANT: OrPlugin must be installed BEFORE DeferPlugin to properly handle
+  // expressions like: await someCall() or |err| { ... }
 	Install(plugins.OrPlugin).
+	Install(plugins.DeferPlugin).
 	Install(plugins.StrictEqualityPlugin).
 	Install(plugins.NewPlugin).
 	Install(plugins.ThrowPlugin).
@@ -134,6 +136,35 @@ Plugins extend the `xjs` parser using three interceptor types:
 3. **Expression Interceptors** (`UseExpressionInterceptor`) - Transform parsed expressions
 
 Each plugin defines custom AST nodes that implement `WriteTo(*strings.Builder)` to generate final JavaScript output.
+
+### ⚠️ CRITICAL: Plugin Installation Order
+
+**The order in which plugins are installed is CRITICAL** because expression interceptors process tokens in FIFO order (First-In, First-Out). The current required order is:
+
+```go
+Install(plugins.OrPlugin).        // Must be FIRST to wrap expressions
+Install(plugins.DeferPlugin).     // Processes await/async after or wrapping
+Install(plugins.StrictEqualityPlugin).
+Install(plugins.NewPlugin).
+Install(plugins.ThrowPlugin)
+```
+
+**Why this order matters:**
+- `OrPlugin` must process expressions **before** `DeferPlugin` so that constructs like `await someCall() or |err| { ... }` work correctly
+- If `DeferPlugin` is installed first, the `await` interceptor would process the expression before `or` has a chance to wrap it, causing parsing errors
+- This is because expression interceptors call `next()` to get the next expression in the chain, and the order determines which interceptor processes the tokens first
+
+**Example that requires correct order:**
+```djs
+async function fetchData() {
+  await makeRequest(url) or |err| {
+    console.error('Request failed:', err)
+    return null
+  }
+}
+```
+
+If plugin order is wrong, you'll get errors like: `expected callable expression after await, got {Type: }, Literal: "}"`
 
 ### Key Plugins
 
