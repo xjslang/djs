@@ -7,6 +7,13 @@ import (
 	"github.com/xjslang/djs/cmd"
 )
 
+// Build-time injected variables
+var (
+	Version   = "dev"
+	GitCommit = "unknown"
+	BuildDate = "unknown"
+)
+
 func main() {
 	args := os.Args[1:]
 
@@ -27,9 +34,10 @@ func main() {
 	}
 }
 
-// TODO: implement version
 func printVersion() int {
-	fmt.Println("version")
+	fmt.Printf("djs version %s\n", Version)
+	fmt.Printf("  commit: %s\n", GitCommit)
+	fmt.Printf("  built:  %s\n", BuildDate)
 	return 0
 }
 

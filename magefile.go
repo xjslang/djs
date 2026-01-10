@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/magefile/mage/sh"
 )
@@ -62,4 +63,32 @@ func Clean() error {
 func Install() error {
 	fmt.Println("📦 Installing dependencies...")
 	return sh.RunV("go", "mod", "download")
+}
+
+// Build compiles the project with version information
+func Build() error {
+	fmt.Println("🔨 Building djs...")
+
+	// Get version from git tag
+	version, err := sh.Output("git", "describe", "--tags", "--always", "--dirty")
+	if err != nil {
+		version = "dev"
+	}
+
+	// Get git commit hash
+	commit, err := sh.Output("git", "rev-parse", "--short", "HEAD")
+	if err != nil {
+		commit = "unknown"
+	}
+
+	// Get build date
+	buildDate := time.Now().UTC().Format("2006-01-02_15:04:05")
+
+	// Build with ldflags
+	ldflags := fmt.Sprintf(
+		"-X main.Version=%s -X main.GitCommit=%s -X main.BuildDate=%s",
+		version, commit, buildDate,
+	)
+
+	return sh.RunV("go", "build", "-ldflags", ldflags, "-o", "djs", ".")
 }
