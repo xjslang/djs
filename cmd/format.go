@@ -13,18 +13,10 @@ import (
 
 func Format(args []string) int {
 	flag.CommandLine.Parse(args)
-
 	inputPath := flag.Arg(0)
 
-	// Get original file permissions
-	fileInfo, err := os.Stat(inputPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading file %s: %v\n", inputPath, err)
-		return 1
-	}
-	originalMode := fileInfo.Mode()
-
-	inputCode, err := os.ReadFile(inputPath)
+	// Read file contents
+	data, err := os.ReadFile(inputPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file %s: %v\n", inputPath, err)
 		return 1
@@ -32,7 +24,7 @@ func Format(args []string) int {
 
 	// Compile and transforms AST for proper formatting
 	lb := lexer.NewBuilder()
-	b := builder.New(lb).Build(string(inputCode))
+	b := builder.New(lb).Build(string(data))
 	program, err := b.ParseProgram()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -41,12 +33,29 @@ func Format(args []string) int {
 	program.Statements = plugins.Transform(program.Statements)
 	result := compiler.New().WithPrettyPrint(compiler.WithSemi(false)).Compile(program)
 
-	// Overwrite file preserving original permissions
-	err = os.WriteFile(inputPath, []byte(result.Code), originalMode.Perm())
+	// Save file preserving the original permissions
+	err = saveFile(inputPath, []byte(result.Code))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing file %s: %v\n", inputPath, err)
 		return 1
 	}
 
 	return 0
+}
+
+func saveFile(path string, data []byte) error {
+	// Get original file permissions
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	originalMode := fileInfo.Mode()
+
+	// Overwrite file preserving original permissions
+	err = os.WriteFile(path, data, originalMode.Perm())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
