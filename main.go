@@ -16,7 +16,8 @@ func main() {
 
 	switch args[0] {
 	case "fmt", "format":
-		os.Exit(cmd.Format(args))
+		fmtArgs := args[1:] // exclude the `fmt` argument
+		os.Exit(cmd.Format(fmtArgs))
 	case "v", "version":
 		os.Exit(printVersion())
 	case "h", "help":
