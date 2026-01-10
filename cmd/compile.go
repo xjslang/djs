@@ -28,7 +28,6 @@ type ParserErrors struct {
 
 // TODO: add `-stdin` flag to indicate that the input contents would be provider view stdin
 func Compile(args []string) int {
-	fmt.Println(args)
 	var outputPath string
 	var generateSourceMap bool
 	var inlineSourceMap bool
