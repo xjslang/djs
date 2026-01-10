@@ -9,9 +9,9 @@ import (
 func New(lb *lexer.Builder) *parser.Builder {
 	return parser.NewBuilder(lb).
 		WithSmartSemicolon(true).
-		Install(plugins.DeferPlugin).
-		Install(plugins.OrPlugin).
-		Install(plugins.StrictEqualityPlugin).
+		Install(plugins.ThrowPlugin).
 		Install(plugins.NewPlugin).
-		Install(plugins.ThrowPlugin)
+		Install(plugins.StrictEqualityPlugin).
+		Install(plugins.OrPlugin).
+		Install(plugins.DeferPlugin)
 }
