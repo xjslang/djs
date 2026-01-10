@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/xjslang/djs/builder"
@@ -17,8 +18,27 @@ import (
 func Format(args []string) int {
 	var stdin bool
 	flag.BoolVar(&stdin, "stdin", false, "Read input from stdin, instead of a file, and prints it formatted")
+
+	flag.Usage = func() {
+		command := filepath.Base(os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s fmt [file.djs]\n", command)
+		fmt.Fprintln(os.Stderr, "\nOptions:")
+		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nExamples:")
+		fmt.Fprintf(os.Stderr, "  %s fmt input.djs # Format input.djs and rewrite it\n", command)
+		fmt.Fprintf(os.Stderr, "  %s fmt --stdin   # Format from stdin and print the result\n", command)
+	}
+
 	_ = flag.CommandLine.Parse(args)
 
+	// validates flags and args
+	if numArgs := flag.NArg(); stdin && numArgs > 0 || !stdin && numArgs != 1 {
+		fmt.Println(stdin)
+		flag.Usage()
+		return 2
+	}
+
+	// Read arguments
 	inputPath := flag.Arg(0)
 
 	if stdin {
