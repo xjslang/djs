@@ -213,10 +213,7 @@ async function handleFailedCommand() {
   })
   
   await waitForProcess(child) or |err| {
-    console.log(`   ✅ Caught error as expected: ${err.message}`)
-    return
-  } or |err| {
-    console.log(`   ✅ Caught error as expected: ${err.message}`)
+    console.log('   ✅ Caught error as expected: ${err.message}')
     return
   }
   
