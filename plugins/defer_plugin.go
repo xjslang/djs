@@ -1,8 +1,6 @@
 package plugins
 
 import (
-	"fmt"
-
 	"github.com/rs/xid"
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/lexer"
@@ -89,7 +87,7 @@ func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
 
 type AwaitExpression struct {
 	Token token.Token // the 'await' token
-	Right *ast.CallExpression
+	Right ast.Expression
 }
 
 func (ae *AwaitExpression) WriteTo(cw *ast.CodeWriter) {
@@ -133,14 +131,9 @@ func DeferPlugin(pb *parser.Builder) {
 		tok := p.CurrentToken
 		p.NextToken() // consume 'await'
 		exp := next()
-		fe, ok := exp.(*ast.CallExpression)
-		if !ok {
-			p.AddError(fmt.Sprintf("expected callable expression after await, got %v", p.PeekToken))
-			return nil
-		}
 		return &AwaitExpression{
 			Token: tok,
-			Right: fe,
+			Right: exp,
 		}
 	})
 
