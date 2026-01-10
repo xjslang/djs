@@ -65,7 +65,7 @@ func Compile(args []string) int {
 		fmt.Fprintln(os.Stderr, "  djs -o output.js --sourcemap --source-root /src/ input.djs      # Source root prefix")
 	}
 
-	flag.CommandLine.Parse(args)
+	_ = flag.CommandLine.Parse(args)
 
 	// Accept 0 arguments (stdin) or 1 argument (file)
 	if flag.NArg() > 1 {
