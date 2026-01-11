@@ -94,7 +94,7 @@ func compile(input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	program.Statements = plugins.Transform(program.Statements)
+	plugins.TransformStatement(program)
 	result := compiler.New().WithPrettyPrint(compiler.WithSemi(false)).Compile(program)
 	return result.Code, nil
 }
