@@ -44,11 +44,11 @@ func (lsf *LetStatementFormatter) WriteTo(cw *ast.CodeWriter) {
 	lsf.LetStatement.WriteTo(cw)
 }
 
-type OrFormatter struct {
+type OrExpressionFormatter struct {
 	*OrExpression
 }
 
-func (of *OrFormatter) WriteTo(cw *ast.CodeWriter) {
+func (of *OrExpressionFormatter) WriteTo(cw *ast.CodeWriter) {
 	of.Expression.WriteTo(cw)
 	cw.WriteString(" or ")
 	if of.ErrorParam != nil {
@@ -72,7 +72,7 @@ func TransformExpression(exp ast.Expression) ast.Expression {
 	switch v := exp.(type) {
 	// wrap custom expressions with a "formatter" and return it
 	case *OrExpression:
-		return &OrFormatter{OrExpression: v}
+		return &OrExpressionFormatter{OrExpression: v}
 	// traverse the rest of the tree
 	case *DeferFunctionExpression:
 		v.Body.Statements = TransformStatements(v.Body.Statements)
