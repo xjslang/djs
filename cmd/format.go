@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/xjslang/djs/builder"
-	"github.com/xjslang/djs/plugins"
+	"github.com/xjslang/djs/formatters"
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
 )
@@ -94,7 +94,7 @@ func compile(input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	plugins.TransformStatement(program)
+	formatters.Prepare(program)
 	result := compiler.New().WithPrettyPrint(compiler.WithSemi(false)).Compile(program)
 	return result.Code, nil
 }

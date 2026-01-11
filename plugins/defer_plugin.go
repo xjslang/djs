@@ -49,37 +49,37 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 
 type DeferFunctionDeclaration struct {
 	*ast.FunctionDeclaration
-	prefix  string
-	asyncFn bool
+	Prefix  string
+	AsyncFn bool
 }
 
 func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
-	if fd.asyncFn {
+	if fd.AsyncFn {
 		cw.WriteString("async ")
 	}
-	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.prefix)
+	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.Prefix)
 }
 
 type DeferFunctionExpression struct {
 	*ast.FunctionExpression
-	prefix  string
-	asyncFn bool
+	Prefix  string
+	AsyncFn bool
 }
 
 func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
-	if fe.asyncFn {
+	if fe.AsyncFn {
 		cw.WriteString("async ")
 	}
-	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.prefix)
+	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.Prefix)
 }
 
 type DeferStatement struct {
 	Body   *ast.BlockStatement
-	prefix string
+	Prefix string
 }
 
 func (ds *DeferStatement) WriteTo(cw *ast.CodeWriter) {
-	deferName := "defers_" + ds.prefix
+	deferName := "defers_" + ds.Prefix
 	cw.WriteString(deferName + ".push(() =>")
 	ds.Body.WriteTo(cw)
 	cw.WriteString(");")
@@ -146,8 +146,8 @@ func DeferPlugin(pb *parser.Builder) {
 			p.NextToken() // consume 'async'
 		}
 		return &DeferFunctionDeclaration{
-			asyncFn:             asyncFn,
-			prefix:              id.String(),
+			AsyncFn:             asyncFn,
+			Prefix:              id.String(),
 			FunctionDeclaration: p.ParseFunctionStatement(),
 		}
 	})
@@ -163,8 +163,8 @@ func DeferPlugin(pb *parser.Builder) {
 		expr := p.ParseFunctionExpression()
 		if fe, ok := expr.(*ast.FunctionExpression); ok {
 			return &DeferFunctionExpression{
-				asyncFn:            asyncFn,
-				prefix:             id.String(),
+				AsyncFn:            asyncFn,
+				Prefix:             id.String(),
 				FunctionExpression: fe,
 			}
 		}
@@ -181,7 +181,7 @@ func DeferPlugin(pb *parser.Builder) {
 			return nil
 		}
 
-		stmt := &DeferStatement{prefix: id.String()}
+		stmt := &DeferStatement{Prefix: id.String()}
 		if p.PeekToken.Type == token.LBRACE {
 			p.NextToken() // consume {
 			stmt.Body = p.ParseBlockStatement()

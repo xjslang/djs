@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/xjslang/djs/builder"
-	"github.com/xjslang/djs/plugins"
+	"github.com/xjslang/djs/formatters"
 	"github.com/xjslang/xjs/compiler"
 	"github.com/xjslang/xjs/lexer"
 )
@@ -26,8 +26,7 @@ func TestFormat(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseProgram error = %v", err)
 	}
-	plugins.TransformStatement(program)
-	// debug.Print(program)
+	formatters.Prepare(program)
 	result := compiler.New().WithPrettyPrint().Compile(program)
 	fmt.Println(result.Code)
 }
