@@ -28,7 +28,7 @@ func TestFormat(t *testing.T) {
 	formatters.Prepare(program)
 	result := compiler.New().WithPrettyPrint(compiler.WithSemi(false)).Compile(program)
 
-	expected := `function processData(items){
+	expected := `function processData(items) {
   let result = []
   for (let i = 0; i < items.length; i++) {
     let item = items[i]
@@ -38,7 +38,7 @@ func TestFormat(t *testing.T) {
   }
   return result
 }
-async function main(){
+async function main() {
   let db = connect("localhost") or |err| {
     console.error("Connection failed:", err)
     return
