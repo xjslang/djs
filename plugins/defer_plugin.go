@@ -190,10 +190,6 @@ func DeferPlugin(pb *parser.Builder) {
 			p.NextToken() // move to statement
 			stmt.Body = &ast.BlockStatement{}
 			stmt.Body.Statements = []ast.Statement{p.ParseStatement()}
-			// Single-line defer needs semicolon (explicit or ASI)
-			if !p.ExpectSemicolonASI() {
-				return nil
-			}
 		}
 		return stmt
 	})
