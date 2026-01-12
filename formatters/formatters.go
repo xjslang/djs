@@ -85,20 +85,26 @@ func prepareExpression(exp ast.Expression) ast.Expression {
 	}
 
 	switch v := exp.(type) {
-	// wrap custom expressions with a "formatter" and return it
+	// updates nodes for appropriate formatting
 	case *plugins.OrExpression:
 		v.Expression = prepareExpression(v.Expression)
 		return &OrExpressionFormatter{OrExpression: v}
+	case *ast.BinaryExpression:
+		switch v.Operator {
+		case "===":
+			v.Operator = "=="
+		case "!==":
+			v.Operator = "!="
+		}
+		v.Left = prepareExpression(v.Left)
+		v.Right = prepareExpression(v.Right)
+		return v
 	// traverse the rest of the tree
 	case *plugins.DeferFunctionExpression:
 		v.Body.Statements = prepareStatements(v.Body.Statements)
 		return v
 	case *ast.FunctionExpression:
 		v.Body.Statements = prepareStatements(v.Body.Statements)
-		return v
-	case *ast.BinaryExpression:
-		v.Left = prepareExpression(v.Left)
-		v.Right = prepareExpression(v.Right)
 		return v
 	case *ast.UnaryExpression:
 		v.Right = prepareExpression(v.Right)
