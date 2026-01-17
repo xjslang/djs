@@ -45,7 +45,6 @@ func writeFunctionWithDefers(cw *ast.CodeWriter, name *ast.Identifier, parameter
 		cw.WriteRune(')')
 		cw.WriteSpace()
 		body.WriteTo(cw)
-		cw.WriteNewline()
 	}
 }
 
