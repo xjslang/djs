@@ -176,7 +176,10 @@ func Compile(args []string) int {
 				fmt.Fprintf(os.Stderr, "Error serializing error response: %v\n", jerr)
 				return 1
 			}
-			fmt.Fprintln(os.Stdout, string(jsonBytes))
+			if _, err := fmt.Fprintln(os.Stdout, string(jsonBytes)); err != nil {
+				fmt.Fprintf(os.Stderr, "Error writing output: %v\n", err)
+				return 1
+			}
 		} else {
 			fmt.Fprintln(os.Stderr, perr)
 		}
@@ -325,7 +328,7 @@ func Compile(args []string) int {
 		fmt.Fprintf(os.Stderr, "Error writing temp JS: %v\n", terr)
 		return 1
 	}
-	defer os.Remove(tmpFile)
+	defer func() { _ = os.Remove(tmpFile) }()
 
 	// Execute with Node enabling source maps so runtime errors map to original DJS
 	cmd := exec.Command("node", "--enable-source-maps", tmpFile)
@@ -336,7 +339,7 @@ func Compile(args []string) int {
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) {
 			if exitErr.ProcessState != nil {
-				return exitErr.ProcessState.ExitCode()
+				return exitErr.ExitCode()
 			}
 			return 1
 		}
