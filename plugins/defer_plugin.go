@@ -58,6 +58,7 @@ func (fd *DeferFunctionDeclaration) WriteTo(cw *ast.CodeWriter) {
 	if fd.AsyncFn {
 		cw.WriteString("async ")
 	}
+	cw.WriteLeadingComments(fd.Token.LeadingComments)
 	writeFunctionWithDefers(cw, fd.Name, fd.Parameters, fd.Body, fd.Prefix)
 }
 
@@ -71,6 +72,7 @@ func (fe *DeferFunctionExpression) WriteTo(cw *ast.CodeWriter) {
 	if fe.AsyncFn {
 		cw.WriteString("async ")
 	}
+	cw.WriteLeadingComments(fe.Token.LeadingComments)
 	writeFunctionWithDefers(cw, fe.Name, fe.Parameters, fe.Body, fe.Prefix)
 }
 
