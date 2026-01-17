@@ -10,13 +10,7 @@ import (
 )
 
 func TestFormat(t *testing.T) {
-	input := `function processData(items){let result=[];for(let i=0;i<items.length
-		;i++){let item=items[i];if(item.active){result.push(item.value);}}return
-		result;}async function main(){let db=connect("localhost") or |err|{console.
-		error("Connection failed:",err);return;};defer db.close();let users=await
-		db.query("SELECT * FROM users") or {console.log("Query failed");return [];};
-		for(let i=0;i<users.length;i++){let user=users[i];if(user.age>=18){console.
-		log(user.name);}}defer console.log("Cleanup complete");}`
+	input := `function processData(items){let result=[];for(let i=0;i<items.length;i++){let item=items[i];if(item.active){result.push(item.value);}}return result;}async function main(){let db=connect("localhost") or |err|{console.error("Connection failed:",err);return;};defer db.close();let users=await db.query("SELECT * FROM users") or {console.log("Query failed");return [];};for(let i=0;i<users.length;i++){let user=users[i];if(user.age>=18){console.log(user.name);}}defer console.log("Cleanup complete");}`
 
 	lb := lexer.NewBuilder()
 	p := builder.New(lb).Build(input)
