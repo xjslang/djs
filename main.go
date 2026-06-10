@@ -3,7 +3,9 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/xjslang/xjs"
 	"github.com/xjslang/xjs/ast"
@@ -84,13 +86,21 @@ func rndID() string {
 }
 
 func main() {
-	input := `function foo() {
-		defer console.log('close db')
-		defer {console.log('close file')}
-		let x = 100
-	}`
+	flag.Parse()
+	if flag.NArg() != 1 {
+		fmt.Fprintf(os.Stderr, "Usage: %s <file.djs>\n", os.Args[0])
+		os.Exit(2)
+	}
+
+	source := flag.Arg(0)
+	input, err := os.ReadFile(source)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	b := xjs.NewBuilder().Install(djsPlugin)
-	p := b.Build([]byte(input))
+	p := b.Build(input)
 	result, err := js.ParseProgram(p)
 	if err != nil {
 		panic(err)
