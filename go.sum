@@ -8,5 +8,7 @@ github.com/xjslang/xjs v0.9.1-alpha h1:Tc4jEhFnvwPju4iWxVUeajj/RU2adUp9Wl+Ctyl3Q
 github.com/xjslang/xjs v0.9.1-alpha/go.mod h1:VErRpoiBC7NhAev6auL7VsP+CsdtLaz0VrQY71K/PYc=
 github.com/xorcare/golden v0.8.4 h1:HzKYLy0CL1JTZu5ZwXKrZLLIjnqZJL0f11osydG0tnQ=
 github.com/xorcare/golden v0.8.4/go.mod h1:7SmXXPag5JmyHXF3dAiQ9eW5LsnKAMqGTQ8fvPFAJM8=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
