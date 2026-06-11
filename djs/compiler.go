@@ -11,17 +11,17 @@ import (
 	"github.com/xjslang/xjs/printer"
 )
 
-func Compile(node ast.Node) string {
+func Compile(node ast.Node) (string, error) {
 	p := xjs.NewPrinter(printer.Compact())
 	p.UsePrinter(compiler)
 	p.Print(node)
-	return p.String()
+	return p.Output()
 }
 
 // A printer tells the printer how to print specific AST nodes.
 //
 // In this case we are telling it how to print blocks and "defer" statements.
-func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node)) {
+func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error) (err error) {
 	switch v := node.(type) {
 	case *js.BlockStmt:
 		// tells the printer how to print blocks that contains "defer" statements
@@ -46,7 +46,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node)) {
 		ctx := p.Context()
 		defersName, ok := ctx["defersName"]
 		if !ok {
-			panic("defer cannot be used outside a block")
+			return printer.ErrorAt(v.Layout.Defer, "defer cannot be used outside a block")
 		}
 
 		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
@@ -56,7 +56,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node)) {
 		p.Print(")")
 		return
 	}
-	next(node) // delegate in the next printer
+	return next(node) // delegate in the next printer
 }
 
 func isDeferBlock(node *js.BlockStmt) bool {

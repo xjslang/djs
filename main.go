@@ -30,6 +30,10 @@ func main() {
 	}
 
 	// transform AST into a compiled string
-	compiled := djs.Compile(result)
+	compiled, err := djs.Compile(result)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	fmt.Println(compiled)
 }
