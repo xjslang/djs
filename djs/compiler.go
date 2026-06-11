@@ -48,6 +48,9 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node)) {
 		if !ok {
 			panic("defer cannot be used outside a block")
 		}
+
+		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
+		// SpPrint: ensure a space is added before printing (equiv: p.EnsureSpace(); p.Print(a))
 		p.LnPrint(fmt.Sprintf("%s.unshift(() =>", defersName))
 		p.SpPrint(v.Stmt)
 		p.Print(")")
