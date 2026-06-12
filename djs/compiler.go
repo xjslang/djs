@@ -20,8 +20,8 @@ func Compile(node ast.Node) (string, error) {
 
 // A printer tells the printer how to print specific AST nodes.
 //
-// In this case we are telling it how to print blocks and "defer" statements.
-func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error) (err error) {
+// In this case we are telling it how to COMPILE blocks and defer statements.
+func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
 	switch v := node.(type) {
 	case *js.BlockStmt:
 		// tells the printer how to print blocks that contains "defer" statements
@@ -39,7 +39,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 				"for (let defer of %s) { "+
 				"try { defer() } catch (e) { console.error(e) }"+
 				"}}}", defersName))
-			return
+			return nil
 		}
 	case *DeferStmt:
 		// tells the printer how to print "defer" statements
@@ -54,7 +54,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 		p.LnPrint(fmt.Sprintf("%s.unshift(() =>", defersName))
 		p.SpPrint(v.Stmt)
 		p.Print(")")
-		return
+		return nil
 	}
 	return next(node) // delegate in the next printer
 }

@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	var format bool
+	flag.BoolVar(&format, "format", false, "format code")
 	flag.Parse()
 	if flag.NArg() != 1 {
 		fmt.Fprintf(os.Stderr, "Usage: %s <file.djs>\n", os.Args[0])
@@ -29,11 +31,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// transform AST into a compiled string
-	compiled, err := djs.Compile(result)
+	var code string
+	if format {
+		code, err = djs.Format(result)
+	} else {
+		code, err = djs.Compile(result)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Println(compiled)
+
+	fmt.Println(code)
 }
