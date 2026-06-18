@@ -70,6 +70,6 @@ func isDeferBlock(node *js.BlockStmt) bool {
 
 func rndID() string {
 	b := make([]byte, 4)
-	rand.Read(b)
+	rand.Read(b) //nolint
 	return hex.EncodeToString(b)
 }

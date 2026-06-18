@@ -16,12 +16,14 @@ func djsPlugin(b *builder.Builder) {
 	deferTyp := token.RegisterType("defer")
 
 	// now the scanner can scan the "defer" keyword
-	b.UseScanner(func(sc *scanner.Scanner, next func() token.Token) token.Token {
-		tok := next()
+	b.UseScanner(func(sc *scanner.Scanner, next func() (token.Token, error)) (tok token.Token, err error) {
+		if tok, err = next(); err != nil {
+			return
+		}
 		if tok.Type == token.IDENT && tok.Literal == "defer" {
 			tok.Type = deferTyp
 		}
-		return tok
+		return
 	})
 
 	// now the parser can parse the "defer" syntax

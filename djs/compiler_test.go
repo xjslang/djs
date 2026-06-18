@@ -91,7 +91,7 @@ func requireNode16OrGreater(t *testing.T) {
 	require.NoError(t, err)
 	matches := r.FindSubmatch(output)
 	require.Len(t, matches, 2)
-	version, err := strconv.Atoi(string(matches[1]))
+	version, _ := strconv.Atoi(string(matches[1]))
 	if version < 16 {
 		t.Fatalf("node v16 or greater is required. Installed version: %s", output)
 	}
