@@ -17,9 +17,6 @@ function init() {
 }
 ```
 
-> [!NOTE]
-> XJS is still in alpha and **is not** fully JavaScript compliant (nor is it expected to be).
-
 ## Install
 
 Clone and install the repo:
@@ -34,6 +31,44 @@ And now you can use the `djs` command line:
 ```bash
 djs <file.djs>         # compiles DJS to standard JS
 djs -format <file.djs> # format DJS
+```
+
+## Example
+The following command:
+```bash
+djs -stdin <<< "function foo() { defer closeDb() }"
+```
+
+outputs:
+```js
+function foo() { let __defers_123__ = [];
+try {{__defers_123__.unshift(() => closeDb());}}
+finally {for (let defer of __defers_123__)
+{ try { defer() } catch (e) { console.error(e) }}}}
+```
+
+or formatted:
+```js
+function foo() {
+  let __defers_123__ = [];
+  try {
+    {
+      __defers_123__.unshift(() => closeDb());
+    }
+  } finally {
+    for (let defer of __defers_123__) {
+      try {
+        // defers are called at the end of the block
+        defer();
+      } catch (e) {
+        // If a "defer" fails, it displays an error and
+        // does not prevent the other "defers" from executing.
+        // This ensures that all defers are called.
+        console.error(e);
+      }
+    }
+  }
+}
 ```
 
 ## How does it work?
