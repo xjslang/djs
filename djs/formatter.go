@@ -7,8 +7,9 @@ import (
 )
 
 func Format(node ast.Node, opts ...printer.Option) (string, error) {
-	p := xjs.NewPrinter(opts...)
-	p.UsePrinter(formatter)
+	p := xjs.PrinterBuilder().
+		UsePrinter(formatter).
+		Build(opts...)
 	p.Print(node)
 	return p.Output()
 }
