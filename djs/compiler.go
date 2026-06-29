@@ -12,8 +12,9 @@ import (
 )
 
 func Compile(node ast.Node) (string, error) {
-	p := xjs.NewPrinter(printer.Compact())
-	p.UsePrinter(compiler)
+	p := xjs.PrinterBuilder().
+		UsePrinter(compiler).
+		Build(printer.Compact())
 	p.Print(node)
 	return p.Output()
 }

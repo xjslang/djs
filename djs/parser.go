@@ -7,7 +7,8 @@ import (
 )
 
 func Parse(input []byte) (ast.Node, error) {
-	b := xjs.NewBuilder().Install(djsPlugin)
-	p := b.Build(input)
+	p := xjs.PluginBuilder().
+		Install(djsPlugin).
+		Build(input)
 	return js.ParseProgram(p)
 }
