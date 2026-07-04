@@ -2,8 +2,8 @@ package djs
 
 import (
 	"github.com/xjslang/xjs/ast"
-	"github.com/xjslang/xjs/builder"
 	"github.com/xjslang/xjs/parser"
+	"github.com/xjslang/xjs/plugin"
 	"github.com/xjslang/xjs/scanner"
 	"github.com/xjslang/xjs/token"
 )
@@ -12,7 +12,7 @@ import (
 // constructs that are not necessarily part of the JavaScript language.
 //
 // In this case we are telling the parser how to parse "defer" statements.
-func djsPlugin(b *builder.Builder) {
+func djsPlugin(b *plugin.Builder) {
 	deferTyp := token.RegisterType("defer")
 
 	// now the scanner can scan the "defer" keyword
