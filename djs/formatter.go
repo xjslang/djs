@@ -22,8 +22,8 @@ func formatter(p *printer.Printer, node ast.Node, next func(node ast.Node) error
 	case *DeferStmt:
 		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
 		// SpPrint: ensure a space is added before printing (equiv: p.EnsureSpace(); p.Print(a))
-		p.LnPrint(v.Layout.Defer)
-		p.SpPrint(v.Stmt)
+		p.Line().Print(v.Layout.Defer)
+		p.Space().Print(v.Stmt)
 		return nil
 	}
 	return next(node)

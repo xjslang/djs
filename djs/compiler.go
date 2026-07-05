@@ -34,7 +34,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 			defer p.PopContext()
 			ctx["defersName"] = defersName
 
-			p.LnPrint(fmt.Sprintf("{ let %s = []; try {", defersName))
+			p.Line().Print(fmt.Sprintf("{ let %s = []; try {", defersName))
 			js.PrintBlockStmt(p, v)
 			p.Print(fmt.Sprintf("} finally {"+
 				"for (let defer of %s) { "+
@@ -52,9 +52,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 
 		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
 		// SpPrint: ensure a space is added before printing (equiv: p.EnsureSpace(); p.Print(a))
-		p.LnPrint(fmt.Sprintf("%s.unshift(() =>", defersName))
-		p.SpPrint(v.Stmt)
-		p.Print(")")
+		p.Line().Print(fmt.Sprintf("%s.unshift(() => {", defersName), v.Stmt, "});")
 		return nil
 	}
 	return next(node) // delegate in the next printer
