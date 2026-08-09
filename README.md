@@ -70,31 +70,3 @@ function foo() {
   }
 }
 ```
-
-## How does it work?
-
-The XJS library exports `NewBuilder` and `NewPrinter` functions to create custom parsers and printers.
-
-```go
-// here we are creating a parser builder
-b := xjs.NewBuilder().
-  Install(djsPlugin).
-  Install(awaitPlugin).
-  Install(strictEqualityPlugin).
-  Install(anotherPlugin)
-  // ...
-
-p := b.Build(sourceCode) // builds the parser
-result, err := js.ParseProgram(p) // returns the AST
-```
-
-Finally, we can transform the AST (Abstract Syntax Tree) to JavaScript code with our custom printer. For example:
-
-```go
-pr := xjs.NewPrinter()
-pr.UsePrinter(compiler) // "instructs" the printer how to print our custom nodes
-pr.Print(result)
-jsCode, err := pr.Output() // Returns JS
-```
-
-Very simple! If you want to learn more, just take a look at the [djs](./djs) folder.

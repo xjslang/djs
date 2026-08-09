@@ -4,8 +4,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
-github.com/xjslang/xjs v0.11.0-beta.2 h1:9MQrkRgnaslPCwSr59/DU7lUmb6c+EUb3cNP+DKI7Vo=
-github.com/xjslang/xjs v0.11.0-beta.2/go.mod h1:pnAnPkhjkUMdxqAjqL7nRE0Ih/suR+eRsR9+ZAEn2BI=
+github.com/xjslang/xjs v0.11.0 h1:1NyAeMuqX3d8Ay/AGs+l93mYe+oxBvv6m2CS1pp4wGQ=
+github.com/xjslang/xjs v0.11.0/go.mod h1:uIpGv7ulUaP8NeBeGHHpg8vSLjznDe0tBx4B25CTywo=
 github.com/xorcare/golden v0.8.4 h1:HzKYLy0CL1JTZu5ZwXKrZLLIjnqZJL0f11osydG0tnQ=
 github.com/xorcare/golden v0.8.4/go.mod h1:7SmXXPag5JmyHXF3dAiQ9eW5LsnKAMqGTQ8fvPFAJM8=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=

@@ -35,7 +35,9 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 			ctx["defersName"] = defersName
 
 			p.Line().Print(fmt.Sprintf("{ let %s = []; try {", defersName))
-			js.PrintBlockStmt(p, v)
+			if err := js.PrintBlockStmt(p, v); err != nil {
+				return err
+			}
 			p.Print(fmt.Sprintf("} finally {"+
 				"for (let defer of %s) { "+
 				"try { defer() } catch (e) { console.error(e) }"+
@@ -47,7 +49,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 		ctx := p.Context()
 		defersName, ok := ctx["defersName"]
 		if !ok {
-			return printer.ErrorAt(v.Layout.Defer, "defer cannot be used outside a block")
+			return printer.ErrorAt(v.Layout.Defer.Position, "defer cannot be used outside a block")
 		}
 
 		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
