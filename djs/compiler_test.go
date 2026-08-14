@@ -56,7 +56,7 @@ func TestCompiler(t *testing.T) {
 	requireNode16OrGreater(t)
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := djs.Parse([]byte(test.input))
+			result, err := djs.Parse(test.input)
 			require.NoError(t, err)
 			jsCode, err := djs.Compile(result)
 			require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestCompiler(t *testing.T) {
 
 func TestCompiler_misusedDefer(t *testing.T) {
 	input := "defer console.log('aaa')"
-	result, err := djs.Parse([]byte(input))
+	result, err := djs.Parse(input)
 	require.NoError(t, err)
 	_, err = djs.Compile(result)
 	require.Error(t, err, "should panic when using defer outside a block")

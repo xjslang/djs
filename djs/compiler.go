@@ -22,7 +22,7 @@ func Compile(node ast.Node) (string, error) {
 // A printer tells the printer how to print specific AST nodes.
 //
 // In this case we are telling it how to COMPILE blocks and defer statements.
-func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error) error {
+func compiler(p *printer.Printer, node ast.Node, next func(*printer.Printer, ast.Node) error) error {
 	switch v := node.(type) {
 	case *js.BlockStmt:
 		// tells the printer how to print blocks that contains "defer" statements
@@ -49,7 +49,8 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 		ctx := p.Context()
 		defersName, ok := ctx["defersName"]
 		if !ok {
-			return printer.ErrorAt(v.Layout.Defer.Position, "defer cannot be used outside a block")
+			// return printer.ErrorAt(v.Layout.Defer.Position, "defer cannot be used outside a block")
+			return p.Error("defer cannot be used outside a block")
 		}
 
 		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
@@ -57,7 +58,7 @@ func compiler(p *printer.Printer, node ast.Node, next func(node ast.Node) error)
 		p.Line().Print(fmt.Sprintf("%s.unshift(() => {", defersName), v.Stmt, "});")
 		return nil
 	}
-	return next(node) // delegate in the next printer
+	return next(p, node) // delegate in the next printer
 }
 
 func isDeferBlock(node *js.BlockStmt) bool {

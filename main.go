@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"unsafe"
 
 	"github.com/xjslang/djs/djs"
 	"github.com/xjslang/xjs/parser"
-	"github.com/xjslang/xjs/token"
 )
 
 func main() {
@@ -46,9 +46,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	src := unsafe.String(unsafe.SliceData(input), len(input))
 	switch {
 	case format:
-		result, err := djs.Parse(input)
+		result, err := djs.Parse(src)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -60,14 +61,14 @@ func main() {
 		}
 		fmt.Println(code)
 	case check:
-		_, err := djs.Parse(input)
+		_, err := djs.Parse(src)
 		if errList, ok := err.(parser.ErrorList); err == nil || ok {
 			fmt.Fprintf(os.Stdout, "{\"errors\": [\n")
 			for i, e := range errList {
-				var start, end token.Position
+				// var start, end int
 				var msg, code string
 				if pe, ok := e.(parser.Error); ok {
-					start, end = pe.Range.Start, pe.Range.End
+					// start, end = pe.Range.Start, pe.Range.End
 					msg = pe.Message
 					code = "SYNTAX"
 				} else {
@@ -78,8 +79,8 @@ func main() {
 					fmt.Fprint(os.Stdout, ",\n")
 				}
 				fmt.Fprint(os.Stdout, "\t{\"range\": {")
-				fmt.Fprintf(os.Stdout, "\"start\": {\"line\": %d, \"column\": %d}, ", start.Line, start.Column)
-				fmt.Fprintf(os.Stdout, "\"end\": {\"line\": %d, \"column\": %d}}, ", end.Line, end.Column)
+				// fmt.Fprintf(os.Stdout, "\"start\": {\"line\": %d, \"column\": %d}, ", start.Line, start.Column)
+				// fmt.Fprintf(os.Stdout, "\"end\": {\"line\": %d, \"column\": %d}}, ", end.Line, end.Column)
 				fmt.Fprintf(os.Stdout, "\"message\": %q, ", msg)
 				fmt.Fprintf(os.Stdout, "\"code\": %q}", code)
 			}
@@ -89,7 +90,7 @@ func main() {
 			os.Exit(1)
 		}
 	default:
-		result, err := djs.Parse(input)
+		result, err := djs.Parse(src)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

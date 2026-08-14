@@ -9,13 +9,13 @@ import (
 	"github.com/xjslang/xjs/token"
 )
 
-func Parse(input []byte) (*js.Program, error) {
+func Parse(input string) (*js.Program, error) {
 	deferTyp := token.RegisterType("DEFER", "defer")
 
 	sb := xjs.ScannerBuilder()
 	// now the scanner can scan the "defer" keyword
-	sb.UseScanner(func(sc *scanner.Scanner, next func() (token.Token, error)) (tok token.Token, err error) {
-		if tok, err = next(); err != nil {
+	sb.UseScanner(func(sc *scanner.Scanner, next func(*scanner.Scanner) (token.Token, error)) (tok token.Token, err error) {
+		if tok, err = next(sc); err != nil {
 			return
 		}
 		if tok.Type == token.IDENT && tok.Literal == "defer" {
@@ -26,7 +26,7 @@ func Parse(input []byte) (*js.Program, error) {
 
 	// now the parser can parse the "defer" syntax
 	pb := xjs.ParserBuilder()
-	pb.UseStmtParser(func(p *parser.Parser, next func() (ast.Stmt, error)) (_ ast.Stmt, err error) {
+	pb.UseStmtParser(func(p *parser.Parser, next func(*parser.Parser) (ast.Stmt, error)) (_ ast.Stmt, err error) {
 		if p.CurrentToken.Type == deferTyp {
 			node := &DeferStmt{}
 			node.Layout.Defer = p.CurrentToken
@@ -36,7 +36,7 @@ func Parse(input []byte) (*js.Program, error) {
 			}
 			return node, nil
 		}
-		return next()
+		return next(p)
 	})
 
 	s := sb.Build(input)
