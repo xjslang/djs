@@ -1,0 +1,22 @@
+linters:
+  default: standard
+  enable:
+    - gofumpt
+
+linters-settings:
+  gofumpt:
+    extra-rules: true
+
+run:
+  timeout: 5m
+  tests: true
+  relative-path-mode: gomod
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    # Allow reflection-using packages
+    - path: (_test\.go)
+      linters:
+        - depguard
