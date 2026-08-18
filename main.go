@@ -9,6 +9,7 @@ import (
 
 	"github.com/xjslang/djs/djs"
 	"github.com/xjslang/xjs/parser"
+	"github.com/xjslang/xjs/token"
 )
 
 func main() {
@@ -65,10 +66,12 @@ func main() {
 		if errList, ok := err.(parser.ErrorList); err == nil || ok {
 			fmt.Fprintf(os.Stdout, "{\"errors\": [\n")
 			for i, e := range errList {
-				// var start, end int
+				var line0, col0 int
+				var line1, col1 int
 				var msg, code string
 				if pe, ok := e.(parser.Error); ok {
-					// start, end = pe.Range.Start, pe.Range.End
+					line0, col0 = token.Position(src, pe.Range.Start)
+					line1, col1 = token.Position(src, pe.Range.End)
 					msg = pe.Message
 					code = "SYNTAX"
 				} else {
@@ -79,8 +82,8 @@ func main() {
 					fmt.Fprint(os.Stdout, ",\n")
 				}
 				fmt.Fprint(os.Stdout, "\t{\"range\": {")
-				// fmt.Fprintf(os.Stdout, "\"start\": {\"line\": %d, \"column\": %d}, ", start.Line, start.Column)
-				// fmt.Fprintf(os.Stdout, "\"end\": {\"line\": %d, \"column\": %d}}, ", end.Line, end.Column)
+				fmt.Fprintf(os.Stdout, "\"start\": {\"line\": %d, \"column\": %d}, ", line0, col0)
+				fmt.Fprintf(os.Stdout, "\"end\": {\"line\": %d, \"column\": %d}}, ", line1, col1)
 				fmt.Fprintf(os.Stdout, "\"message\": %q, ", msg)
 				fmt.Fprintf(os.Stdout, "\"code\": %q}", code)
 			}
