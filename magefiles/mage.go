@@ -11,3 +11,7 @@ func Lint() error {
 func LintFix() error {
 	return sh.RunV("golangci-lint", "run", "--fix")
 }
+
+func BuildWasm() error {
+	return sh.RunV("tinygo", "build", "-o", "djs.wasm", "-target", "wasm", "./cmd/wasm")
+}
