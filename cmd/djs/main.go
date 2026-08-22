@@ -7,7 +7,7 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/xjslang/djs/djs"
+	"github.com/xjslang/djs"
 	"github.com/xjslang/xjs/parser"
 	"github.com/xjslang/xjs/token"
 )

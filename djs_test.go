@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/xjslang/djs/djs"
+	"github.com/xjslang/djs"
 )
 
 func TestCompiler(t *testing.T) {
