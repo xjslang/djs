@@ -5,7 +5,7 @@ package main
 import (
 	"syscall/js"
 
-	"github.com/xjslang/djs/djs"
+	"github.com/xjslang/djs"
 	"github.com/xjslang/xjs/printer"
 )
 

@@ -1,18 +1,9 @@
 package djs
 
 import (
-	"github.com/xjslang/xjs"
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/printer"
 )
-
-func Format(node ast.Node, opts ...printer.Option) (string, error) {
-	p := xjs.PrinterBuilder().
-		UsePrinter(formatter).
-		Build(opts...)
-	p.Print(node)
-	return p.Output()
-}
 
 // A printer tells the printer how to print specific AST nodes.
 //

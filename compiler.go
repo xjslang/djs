@@ -5,19 +5,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/xjslang/xjs"
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/js"
 	"github.com/xjslang/xjs/printer"
 )
-
-func Compile(node ast.Node) (string, error) {
-	p := xjs.PrinterBuilder().
-		UsePrinter(compiler).
-		Build(printer.Compact())
-	p.Print(node)
-	return p.Output()
-}
 
 // A printer tells the printer how to print specific AST nodes.
 //

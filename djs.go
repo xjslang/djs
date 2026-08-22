@@ -5,6 +5,7 @@ import (
 	"github.com/xjslang/xjs/ast"
 	"github.com/xjslang/xjs/js"
 	"github.com/xjslang/xjs/parser"
+	"github.com/xjslang/xjs/printer"
 	"github.com/xjslang/xjs/scanner"
 	"github.com/xjslang/xjs/token"
 )
@@ -42,4 +43,20 @@ func Parse(input string) (*js.Program, error) {
 	s := sb.Build(input)
 	p := pb.Build(s)
 	return js.ParseProgram(p)
+}
+
+func Compile(node ast.Node) (string, error) {
+	p := xjs.PrinterBuilder().
+		UsePrinter(compiler).
+		Build(printer.Compact())
+	p.Print(node)
+	return p.Output()
+}
+
+func Format(node ast.Node, opts ...printer.Option) (string, error) {
+	p := xjs.PrinterBuilder().
+		UsePrinter(formatter).
+		Build(opts...)
+	p.Print(node)
+	return p.Output()
 }
