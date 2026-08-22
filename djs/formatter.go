@@ -20,10 +20,12 @@ func Format(node ast.Node, opts ...printer.Option) (string, error) {
 func formatter(pr *printer.Printer, node ast.Node, next func(*printer.Printer, ast.Node) error) error {
 	switch v := node.(type) {
 	case *DeferStmt:
-		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
-		// SpPrint: ensure a space is added before printing (equiv: p.EnsureSpace(); p.Print(a))
-		pr.Line().Print(v.Layout.Defer)
-		pr.Space().Print(v.Stmt)
+		pr.
+			Line(). // ensure a new line is added before printing
+			Print(v.Layout.Defer)
+		pr.
+			Space(). // ensure a new space is added before printing
+			Print(v.Stmt)
 		return nil
 	}
 	return next(pr, node)

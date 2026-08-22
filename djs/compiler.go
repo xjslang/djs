@@ -53,9 +53,9 @@ func compiler(p *printer.Printer, node ast.Node, next func(*printer.Printer, ast
 			return p.Error("defer cannot be used outside a block")
 		}
 
-		// LnPrint: ensure a newline is added before printing (equiv: p.EnsureLine(); p.Print(a))
-		// SpPrint: ensure a space is added before printing (equiv: p.EnsureSpace(); p.Print(a))
-		p.Line().Print(fmt.Sprintf("%s.unshift(() => {", defersName), v.Stmt, "});")
+		p.
+			Line(). // ensure a new line is added before printing
+			Print(fmt.Sprintf("%s.unshift(() => {", defersName), v.Stmt, "});")
 		return nil
 	}
 	return next(p, node) // delegate in the next printer
