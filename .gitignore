@@ -1,3 +1,4 @@
 # ignore generated artifacts
 *.wasm
 djs
+djs.exe
