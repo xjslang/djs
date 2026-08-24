@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -8,7 +9,6 @@ import (
 	"unsafe"
 
 	"github.com/xjslang/djs"
-	"github.com/xjslang/xjs/parser"
 	"github.com/xjslang/xjs/token"
 )
 
@@ -63,15 +63,16 @@ func main() {
 		fmt.Println(code)
 	case check:
 		_, err := djs.Parse(src)
-		if errList, ok := err.(parser.ErrorList); err == nil || ok {
+		var errList token.ErrorList
+		if err == nil || errors.As(err, &errList) {
 			fmt.Fprintf(os.Stdout, "{\"errors\": [\n")
 			for i, e := range errList {
 				var line0, col0 int
 				var line1, col1 int
 				var msg, code string
-				if pe, ok := e.(parser.Error); ok {
-					line0, col0 = token.Position(src, pe.Range.Start)
-					line1, col1 = token.Position(src, pe.Range.End)
+				if pe, ok := errors.AsType[token.Error](e); ok {
+					line0, col0 = token.Position(src, pe.Range[0])
+					line1, col1 = token.Position(src, pe.Range[1])
 					msg = pe.Message
 					code = "SYNTAX"
 				} else {
