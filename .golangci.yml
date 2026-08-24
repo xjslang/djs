@@ -2,10 +2,25 @@ linters:
   default: standard
   enable:
     - gofumpt
+    - depguard
 
 linters-settings:
   gofumpt:
     extra-rules: true
+  depguard:
+    rules:
+      main:
+        deny:
+          - pkg: "reflect"
+            desc: "reflection is banned to keep WASM size small"
+          - pkg: "encoding/json"
+            desc: "encoding/json uses reflection"
+          - pkg: "fmt"
+            desc: "fmt uses reflection"
+          - pkg: "github.com/davecgh/go-spew/spew"
+            desc: "spew uses reflection"
+          - pkg: "github.com/xjslang/xjs/internal"
+            desc: "internal package is for tests only"
 
 run:
   timeout: 5m
@@ -17,6 +32,10 @@ issues:
   max-same-issues: 0
   exclude-rules:
     # Allow reflection-using packages
-    - path: (_test\.go)
+    - path: _test\.go
+      linters:
+        - depguard
+    # Binary target: no WASM size constraint
+    - path: cmd/djs/main\.go
       linters:
         - depguard

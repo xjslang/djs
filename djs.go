@@ -3,7 +3,6 @@ package djs
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/xjslang/xjs"
 	"github.com/xjslang/xjs/ast"
@@ -65,21 +64,21 @@ func Compile(node ast.Node) (string, error) {
 			case *js.BlockStmt:
 				// tells the printer how to print blocks that contains "defer" statements
 				if isDeferBlock(v) {
-					defersName := fmt.Sprintf("__defers_%s__", rndID())
+					defersName := "__defers_" + rndID() + "__"
 
 					// share a context with its child nodes
 					ctx := p.PushContext()
 					defer p.PopContext()
 					ctx["defersName"] = defersName
 
-					p.Line().Print(fmt.Sprintf("{ let %s = []; try {", defersName))
+					p.Line().Print("{ let ", defersName, " = []; try {")
 					if err := js.PrintBlockStmt(p, v); err != nil {
 						return err
 					}
-					p.Print(fmt.Sprintf("} finally {"+
-						"for (let defer of %s) { "+
-						"try { defer() } catch (e) { console.error(e) }"+
-						"}}}", defersName))
+					p.Print("} finally {",
+						"for (let defer of ", defersName, ") { ",
+						"try { defer() } catch (e) { console.error(e) }",
+						"}}}")
 					return nil
 				}
 			case *DeferStmt:
@@ -93,7 +92,7 @@ func Compile(node ast.Node) (string, error) {
 
 				p.
 					Line(). // ensure a new line is added before printing
-					Print(fmt.Sprintf("%s.unshift(() => {", defersName), v.Stmt, "});")
+					Print(defersName, ".unshift(() => {", v.Stmt, "});")
 				return nil
 			}
 			return next(p, node) // delegate in the next printer
