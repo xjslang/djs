@@ -1,6 +1,7 @@
 module github.com/xjslang/djs
 
-go 1.24
+go 1.26
+toolchain go1.26.2
 
 require (
 	github.com/magefile/mage v1.17.2
