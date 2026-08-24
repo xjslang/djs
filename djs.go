@@ -27,14 +27,12 @@ func Parse(input string) (*js.Program, error) {
 
 	sb := xjs.ScannerBuilder()
 	// now the scanner can scan the "defer" keyword
-	sb.UseScanner(func(sc *scanner.Scanner, next func(*scanner.Scanner) (token.Token, error)) (tok token.Token, err error) {
-		if tok, err = next(sc); err != nil {
-			return
-		}
+	sb.UseScanner(func(sc *scanner.Scanner, next func(*scanner.Scanner) token.Token) token.Token {
+		tok := next(sc)
 		if tok.Type == token.IDENT && tok.Literal == "defer" {
 			tok.Type = deferTyp
 		}
-		return
+		return tok
 	})
 
 	// now the parser can parse the "defer" syntax
