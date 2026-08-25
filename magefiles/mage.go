@@ -32,5 +32,5 @@ func BuildWasm() error {
 }
 
 func Install() error {
-	return sh.RunV("go", "install")
+	return sh.RunV("go", "install", "./cmd/djs/main.go")
 }
