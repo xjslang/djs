@@ -1,12 +1,13 @@
 module github.com/xjslang/djs
 
 go 1.26
+
 toolchain go1.26.2
 
 require (
 	github.com/magefile/mage v1.17.2
 	github.com/stretchr/testify v1.11.1
-	github.com/xjslang/xjs v0.12.0
+	github.com/xjslang/xjs v0.12.1
 )
 
 require (
