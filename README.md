@@ -1,6 +1,6 @@
-# DJS - Defers for JavaScripts
+# DJS (Defers for JavaScripts)
 
-This is a proof of concept for the [XJS](https://github.com/xjslang/xjs) package, a library capable of enriching JavaScript or even altering its default behavior. In this case, we've incorporated the [defers](https://go.dev/tour/flowcontrol/12) structure, popularized by the Go language.
+JS with `defer(s)` built of top of [XJS](https://github.com/xjslang/xjs).
 
 ```js
 function init() {
@@ -17,56 +17,60 @@ function init() {
 }
 ```
 
-## Install
+<details>
+  <summary>Is transpiled to:</summary>
 
-Clone and install the repo:
-
-```bash
-git clone <this repo>
-go install
-```
-
-And now you can use the `djs` command line:
-
-```bash
-djs <file.djs>         # compiles DJS to standard JS
-djs -format <file.djs> # format DJS
-```
-
-## Example
-The following command:
-```bash
-djs -stdin <<< "function foo() { defer closeDb() }"
-```
-
-outputs:
 ```js
-function foo() { let __defers_123__ = [];
-try {{__defers_123__.unshift(() => closeDb());}}
-finally {for (let defer of __defers_123__)
-{ try { defer() } catch (e) { console.error(e) }}}}
-```
-
-or formatted:
-```js
-function foo() {
-  let __defers_123__ = [];
+function init() {
+  let __defers_2a78ec64__ = [];
   try {
     {
-      __defers_123__.unshift(() => closeDb());
+      let db = openDb();
+      __defers_2a78ec64__.unshift(() => {
+        closeDb(db);
+      });
+      let file = openFile("myfile.txt");
+      __defers_2a78ec64__.unshift(() => {
+        {
+          console.log("closing file");
+          closeFile(file);
+        }
+      });
     }
   } finally {
-    for (let defer of __defers_123__) {
+    for (let defer of __defers_2a78ec64__) {
       try {
-        // defers are called at the end of the block
         defer();
       } catch (e) {
-        // If a "defer" fails, it displays an error and
-        // does not prevent the other "defers" from executing.
-        // This ensures that all defers are called.
         console.error(e);
       }
     }
   }
 }
+```
+</details>
+
+## Why?
+
+For language ergonomics. Writing a `try/finally` block for every resource we want to release is cumbersome and hinders the natural reading of the code.
+
+> [!NOTE]
+> The latest versions of JS already have the `using` declaration, but it is still cumbersome and only available recent versions.
+
+## Requirements & Install
+
+You'll need [Go](https://go.dev/doc/install). Once installed, simply do this:
+
+```bash
+git clone <this repo>
+go install ./cmd/djs
+```
+
+Examples of use:
+
+```bash
+djs <file.djs>         # compile DJS to JS
+djs <file.djs> | node  # compile and run
+djs -format <file.djs> # format DJS
+djs -check <file.djs>  # check for errors
 ```
