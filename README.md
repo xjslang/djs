@@ -55,7 +55,7 @@ function init() {
 For language ergonomics. Writing a `try/finally` block for every resource we want to release is cumbersome and hinders the natural reading of the code.
 
 > [!NOTE]
-> The latest versions of JS already have the `using` declaration, but it is still cumbersome and only available recent versions.
+> The latest versions of JS already have the `using` declaration, but it is still cumbersome and only available in latest versions.
 
 ## Requirements & Install
 
